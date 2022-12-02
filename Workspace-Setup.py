@@ -167,6 +167,12 @@ for course, config in course_config.items():
     
     print("-"*80)
 
+# COMMAND ----------
+
+lab_id = dbutils.widgets.get(WorkspaceHelper.PARAM_LAB_ID),
+workspace_description = dbutils.widgets.get(WorkspaceHelper.PARAM_DESCRIPTION),
+workspace_name = spark.conf.get("spark.databricks.workspaceUrl", default=dbgems.get_notebooks_api_endpoint()),
+org_id = dbgems.get_tag("orgId", "unknown")
 
 # COMMAND ----------
 
@@ -177,7 +183,20 @@ for course, config in course_config.items():
 
 # COMMAND ----------
 
-instance_pool_id = DA.workspace.clusters.create_instance_pool()
+from dbacademy.dbhelper.clusters_helper_class import ClustersHelper
+from dbacademy.dbrest import DBAcademyRestClient
+
+client = DBAcademyRestClient()
+
+instance_pool_id = ClustersHelper.create_named_instance_pool(
+    client=client,
+    name=ClustersHelper.POOL_DEFAULT_NAME,
+    min_idle_instances=0,
+    idle_instance_autotermination_minutes=15,
+    lab_id=lab_id,
+    workspace_description=workspace_description,
+    workspace_name=workspace_name,
+    org_id=org_id)
 
 # COMMAND ----------
 
@@ -188,10 +207,14 @@ instance_pool_id = DA.workspace.clusters.create_instance_pool()
 
 # COMMAND ----------
 
-DA.workspace.clusters.create_all_purpose_policy(instance_pool_id)
-DA.workspace.clusters.create_jobs_policy(instance_pool_id)
-DA.workspace.clusters.create_dlt_policy()
-None
+ClustersHelper.create_all_purpose_policy(client, instance_pool_id)
+ClustersHelper.create_jobs_policy(client, instance_pool_id)
+ClustersHelper.create_dlt_policy(client, 
+                                 instance_pool_id=None,
+                                 lab_id=lab_id,
+                                 workspace_description=workspace_description, 
+                                 workspace_name=workspace_name,
+                                 org_id=org_id)
 
 # COMMAND ----------
 
@@ -205,7 +228,7 @@ None
 # COMMAND ----------
 
 # Not required for this course
-DA.workspace.warehouses.create_shared_sql_warehouse(name="DBAcademy Warehouse")
+# DA.workspace.warehouses.create_shared_sql_warehouse(name="DBAcademy Warehouse")
 
 # COMMAND ----------
 
@@ -217,8 +240,8 @@ DA.workspace.warehouses.create_shared_sql_warehouse(name="DBAcademy Warehouse")
 
 # COMMAND ----------
 
-DA.workspace.add_entitlement_workspace_access()
-DA.workspace.add_entitlement_databricks_sql_access()
+# DA.workspace.add_entitlement_workspace_access()
+# DA.workspace.add_entitlement_databricks_sql_access()
 
 # COMMAND ----------
 
