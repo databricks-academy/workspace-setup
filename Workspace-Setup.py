@@ -124,55 +124,48 @@ dbutils.widgets.text(WorkspaceHelper.PARAM_DESCRIPTION, "", "Description (option
 
 # COMMAND ----------
 
-from dbacademy.dbhelper import DBAcademyHelper
-from dbacademy.dbhelper.dataset_manager_class import DatasetManager
+# from dbacademy.dbhelper import DBAcademyHelper
+# from dbacademy.dbhelper.dataset_manager_class import DatasetManager
 
-course_config = {
-    "apache-spark-programming-with-databricks": {},
-    "data-analysis-with-databricks-sql": {
-        "data_source_name": "data-analysis-with-databricks"
-    },
-    "data-engineer-learning-path": {},
-    "data-engineering-with-databricks": {},
-    "deep-learning-with-databricks": {},
-    "introduction-to-python-for-data-science-and-data-engineering": {},
-    "ml-in-production": {},
-    "scalable-machine-learning-with-apache-spark": {},
-}
+# course_config = {
+#     "apache-spark-programming-with-databricks": {},
+#     "data-analysis-with-databricks-sql": {
+#         "data_source_name": "data-analysis-with-databricks"
+#     },
+#     "data-engineer-learning-path": {},
+#     "data-engineering-with-databricks": {},
+#     "deep-learning-with-databricks": {},
+#     "introduction-to-python-for-data-science-and-data-engineering": {},
+#     "ml-in-production": {},
+#     "scalable-machine-learning-with-apache-spark": {},
+# }
 
-for course, config in course_config.items():
-    print(course)
-    data_source_name = config.get("data_source_name", course)
+# for course, config in course_config.items():
+#     print(course)
+#     data_source_name = config.get("data_source_name", course)
     
-    # TODO - parameterize default source
-    datasets_uri = f"wasbs://courseware@dbacademy.blob.core.windows.net/{data_source_name}"
-    data_source_version = sorted([f.name[:-1] for f in dbutils.fs.ls(datasets_uri)])[-1]
-    # TODO - parameterize default directory
-    datasets_path = f"dbfs:/mnt/dbacademy-datasets/{data_source_name}/{data_source_version}"
-    data_source_uri = f"wasbs://courseware@dbacademy.blob.core.windows.net/{data_source_name}/{data_source_version}"
+#     # TODO - parameterize default source
+#     datasets_uri = f"wasbs://courseware@dbacademy.blob.core.windows.net/{data_source_name}"
+#     data_source_version = sorted([f.name[:-1] for f in dbutils.fs.ls(datasets_uri)])[-1]
+#     # TODO - parameterize default directory
+#     datasets_path = f"dbfs:/mnt/dbacademy-datasets/{data_source_name}/{data_source_version}"
+#     data_source_uri = f"wasbs://courseware@dbacademy.blob.core.windows.net/{data_source_name}/{data_source_version}"
 
-    print(f"| {data_source_uri}")
-    print(f"| {datasets_path}")
+#     print(f"| {data_source_uri}")
+#     print(f"| {datasets_path}")
     
-    remote_files = DatasetManager.list_r(data_source_uri)
+#     remote_files = DatasetManager.list_r(data_source_uri)
     
-    dataset_manager = DatasetManager(data_source_uri=data_source_uri,
-                                     staging_source_uri=None,
-                                     datasets_path=datasets_path,
-                                     remote_files=remote_files)
+#     dataset_manager = DatasetManager(data_source_uri=data_source_uri,
+#                                      staging_source_uri=None,
+#                                      datasets_path=datasets_path,
+#                                      remote_files=remote_files)
     
-    dataset_manager.install_dataset(install_min_time=None,
-                                    install_max_time=None,
-                                    reinstall_datasets=False)
+#     dataset_manager.install_dataset(install_min_time=None,
+#                                     install_max_time=None,
+#                                     reinstall_datasets=False)
     
-    print("-"*80)
-
-# COMMAND ----------
-
-lab_id = dbutils.widgets.get(WorkspaceHelper.PARAM_LAB_ID),
-workspace_description = dbutils.widgets.get(WorkspaceHelper.PARAM_DESCRIPTION),
-workspace_name = spark.conf.get("spark.databricks.workspaceUrl", default=dbgems.get_notebooks_api_endpoint()),
-org_id = dbgems.get_tag("orgId", "unknown")
+#     print("-"*80)
 
 # COMMAND ----------
 
@@ -192,11 +185,7 @@ instance_pool_id = ClustersHelper.create_named_instance_pool(
     client=client,
     name=ClustersHelper.POOL_DEFAULT_NAME,
     min_idle_instances=0,
-    idle_instance_autotermination_minutes=15,
-    lab_id=lab_id,
-    workspace_description=workspace_description,
-    workspace_name=workspace_name,
-    org_id=org_id)
+    idle_instance_autotermination_minutes=15)
 
 # COMMAND ----------
 
@@ -207,14 +196,9 @@ instance_pool_id = ClustersHelper.create_named_instance_pool(
 
 # COMMAND ----------
 
-ClustersHelper.create_all_purpose_policy(client, instance_pool_id)
-ClustersHelper.create_jobs_policy(client, instance_pool_id)
-ClustersHelper.create_dlt_policy(client, 
-                                 instance_pool_id=None,
-                                 lab_id=lab_id,
-                                 workspace_description=workspace_description, 
-                                 workspace_name=workspace_name,
-                                 org_id=org_id)
+ClustersHelper.create_all_purpose_policy(client=client, instance_pool_id=instance_pool_id)
+ClustersHelper.create_jobs_policy(client=client, instance_pool_id=instance_pool_id)
+ClustersHelper.create_dlt_policy(client=client, instance_pool_id=None)
 
 # COMMAND ----------
 
@@ -227,12 +211,18 @@ ClustersHelper.create_dlt_policy(client,
 
 # COMMAND ----------
 
-# Not required for this course
-# DA.workspace.warehouses.create_shared_sql_warehouse(name="DBAcademy Warehouse")
+from dbacademy.dbhelper.warehouses_helper_class import WarehousesHelper
+
+WarehousesHelper.create_sql_warehouse(client=client,
+                                      name=WarehousesHelper.WAREHOUSES_DEFAULT_NAME,
+                                      auto_stop_mins=120,
+                                      min_num_clusters=1,
+                                      max_num_clusters=20,
+                                      enable_serverless_compute=True)
 
 # COMMAND ----------
 
-# MAGIC %md --i18n-a382c82f-6e5a-453c-b612-946e184d576c
+# MAGIC %md
 # MAGIC 
 # MAGIC ## Configure User Entitlements
 # MAGIC 
@@ -240,8 +230,10 @@ ClustersHelper.create_dlt_policy(client,
 
 # COMMAND ----------
 
-# DA.workspace.add_entitlement_workspace_access()
-# DA.workspace.add_entitlement_databricks_sql_access()
+WorkspaceHelper.add_entitlement_workspace_access(client)
+WorkspaceHelper.add_entitlement_databricks_sql_access(client)
+WorkspaceHelper.add_entitlement_allow_cluster_create(client)
+WorkspaceHelper.add_entitlement_allow_instance_pool_create(client)
 
 # COMMAND ----------
 
@@ -256,11 +248,12 @@ ClustersHelper.create_dlt_policy(client,
 
 # Ensures that all users can create databases on the current catalog 
 # for cases wherein the user/student is not an admin.
-# job_id = DA.workspace.databases.configure_permissions("Configure-Permissions")
+from dbacademy.dbhelper.databases_helper_class import DatabasesHelper
+job_id = DatabasesHelper.configure_permissions(client, "Configure-Permissions", spark_version="10.4.x-scala2.12")
 
 # COMMAND ----------
 
-# DA.client.jobs().delete_by_id(job_id)
+client.jobs().delete_by_id(job_id)
 
 # COMMAND ----------
 
@@ -271,8 +264,84 @@ ClustersHelper.create_dlt_policy(client,
 
 # COMMAND ----------
 
-# Create Job
-# Bla, bla, bla
+directory = "/Repos/DBAcademy"
+if client.workspace().get_status(directory) is None:
+    print(f"Creating: {directory}")
+    client.workspace.mkdirs(directory)
+    
+repo_dir = f"{directory}/workspace-setup"
+if client.workspace().get_status(repo_dir) is None:
+    print(f"Importing to {repo_dir}")
+    repo_url = "https://github.com/databricks-academy/workspace-setup.git"
+    response = client.repos.create(path=repo_dir, url=repo_url)
+
+# COMMAND ----------
+
+job_name = "DBAcademy Workspace-Setup"
+
+params = {
+    "name": job_name,
+    "timeout_seconds": 7200,
+    "max_concurrent_runs": 1,
+    "tasks": [
+        {
+            "task_key": "Workspace-Setup",
+            "notebook_task": {
+                "notebook_path": "Workspace-Setup",
+                "source": "GIT"
+            },
+            "job_cluster_key": "Workspace-Setup-Cluster",
+            "timeout_seconds": 7200,
+        }
+    ],
+    "job_clusters": [
+        {
+            "job_cluster_key": "Workspace-Setup-Cluster",
+            "new_cluster": {
+                "spark_version": "11.3.x-scala2.12",
+                "spark_conf": {
+                    "spark.master": "local[*, 4]",
+                    "spark.databricks.cluster.profile": "singleNode"
+                },
+                "custom_tags": {
+                    "ResourceClass": "SingleNode"
+                },
+                "spark_env_vars": {
+                    "PYSPARK_PYTHON": "/databricks/python3/bin/python3"
+                },
+                "data_security_mode": "SINGLE_USER",
+                "runtime_engine": "STANDARD",
+                "num_workers": 0
+            }
+        }
+    ],
+    "git_source": {
+        "git_url": "https://github.com/databricks-academy/workspace-setup.git",
+        "git_provider": "gitHub",
+        "git_branch": "published"
+    },
+    "format": "MULTI_TASK"
+}
+
+cluster_params = params.get("job_clusters")[0].get("new_cluster")
+if client.clusters().get_current_instance_pool_id() is not None:
+    cluster_params["instance_pool_id"] = client.clusters().get_current_instance_pool_id()
+else:
+    cluster_params["node_type_id"] = client.clusters().get_current_node_type_id()
+
+job = client.jobs.get_by_name(job_name)
+if job is not None:
+    print("Job already exists.")
+    job_id = job.get("job_id")
+else:
+    print("Creating new job.")
+    job_id = client.jobs().create_2_1(params)["job_id"]
+
+dbgems.display_html(f"""
+<html style="margin:0"><body style="margin:0"><div style="margin:0">
+    See <a href="/#job/{job_id}" target="_blank">{name} ({instance_pool_id})</a>
+</div></body></html>
+""")
 
 # COMMAND ----------
 
