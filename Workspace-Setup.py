@@ -339,7 +339,7 @@ else:
 
 dbgems.display_html(f"""
 <html style="margin:0"><body style="margin:0"><div style="margin:0">
-    See <a href="/#job/{job_id}" target="_blank">{name} ({instance_pool_id})</a>
+    See <a href="/#job/{job_id}" target="_blank">{job_name} ({job_id})</a>
 </div></body></html>
 """)
 
