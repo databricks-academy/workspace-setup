@@ -250,9 +250,6 @@ WorkspaceHelper.add_entitlement_allow_instance_pool_create(client)
 # for cases wherein the user/student is not an admin.
 from dbacademy.dbhelper.databases_helper_class import DatabasesHelper
 job_id = DatabasesHelper.configure_permissions(client, "Configure-Permissions", spark_version="10.4.x-scala2.12")
-
-# COMMAND ----------
-
 client.jobs().delete_by_id(job_id)
 
 # COMMAND ----------
@@ -329,7 +326,10 @@ if client.clusters().get_current_instance_pool_id() is not None:
 else:
     cluster_params["node_type_id"] = client.clusters().get_current_node_type_id()
 
+# COMMAND ----------
+
 job = client.jobs.get_by_name(job_name)
+
 if job is not None:
     print("Job already exists.")
     job_id = job.get("job_id")
