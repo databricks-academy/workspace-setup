@@ -11,6 +11,8 @@
 # MAGIC     * **DBAcademy DLT-Only** - which should be used on DLT piplines (automatically applied)
 # MAGIC * Create or update the shared **DBAcademy Warehouse** for use in Databricks SQL exercises
 # MAGIC * Create the Instance Pool **DBAcademy** for use by students and the "student" and "jobs" policies.
+# MAGIC 
+# MAGIC See https://docs.google.com/document/d/1gb2uLE69eZamw_pzL5q3QZwCK0A0SMLjjTtfGIHrf8I/edit
 
 # COMMAND ----------
 
@@ -102,18 +104,31 @@ print(pip_command)
 from dbacademy import dbgems
 from dbacademy.dbhelper import WorkspaceHelper
 
-# Start a timer so we can benchmark execution duration.
-setup_start = dbgems.clock_start()
+try:
+    created_widgets=False
+    dbutils.widgets.get(WorkspaceHelper.PARAM_LAB_ID)
+    dbutils.widgets.get(WorkspaceHelper.PARAM_DESCRIPTION)
+    dbutils.widgets.get(WorkspaceHelper.PARAM_NODE_TYPE_ID)
+except:
+    created_widgets=True
+    
+    # lab_id is the name assigned to this event/class or alternatively its class number
+    dbutils.widgets.text(WorkspaceHelper.PARAM_LAB_ID, "Unknown", "1. Lab/Class ID (optional)")
 
-# Setup the widgets to collect required parameters.
-dbutils.widgets.dropdown("configure_for", WorkspaceHelper.CONFIGURE_FOR_ALL_USERS, 
-                         [WorkspaceHelper.CONFIGURE_FOR_ALL_USERS], "Configure For (required)")
+    # a general purpose description of the class
+    dbutils.widgets.text(WorkspaceHelper.PARAM_DESCRIPTION, "Unknown", "2. Event Description (optional)")
+    
+    # The node type id that the cluster pool will be bound too
+    dbutils.widgets.text(WorkspaceHelper.PARAM_NODE_TYPE_ID, "", "3. Node Type ID (optional)")
 
-# lab_id is the name assigned to this event/class or alternatively its class number
-dbutils.widgets.text(WorkspaceHelper.PARAM_LAB_ID, "", "Lab/Class ID (optional)")
+# COMMAND ----------
 
-# a general purpose description of the class
-dbutils.widgets.text(WorkspaceHelper.PARAM_DESCRIPTION, "", "Description (optional)")
+if created_widgets:
+    # This has to exist in a different cell or the widgets won't be created.
+    raise Exception("Please fill out widgets at the top and then rerun.")
+else:
+    # Start a timer so we can benchmark execution duration.
+    setup_start = dbgems.clock_start()
 
 # COMMAND ----------
 
@@ -185,7 +200,8 @@ instance_pool_id = ClustersHelper.create_named_instance_pool(
     client=client,
     name=ClustersHelper.POOL_DEFAULT_NAME,
     min_idle_instances=0,
-    idle_instance_autotermination_minutes=15)
+    idle_instance_autotermination_minutes=15,
+    node_type_id=dbgems.get_parameter(WorkspaceHelper.PARAM_NODE_TYPE_ID, None))
 
 # COMMAND ----------
 
@@ -232,8 +248,8 @@ WarehousesHelper.create_sql_warehouse(client=client,
 
 WorkspaceHelper.add_entitlement_workspace_access(client)
 WorkspaceHelper.add_entitlement_databricks_sql_access(client)
-WorkspaceHelper.add_entitlement_allow_cluster_create(client)
-WorkspaceHelper.add_entitlement_allow_instance_pool_create(client)
+# WorkspaceHelper.add_entitlement_allow_cluster_create(client)
+# WorkspaceHelper.add_entitlement_allow_instance_pool_create(client)
 
 # COMMAND ----------
 
