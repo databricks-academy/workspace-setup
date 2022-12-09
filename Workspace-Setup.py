@@ -109,6 +109,7 @@ try:
     dbutils.widgets.get(WorkspaceHelper.PARAM_LAB_ID)
     dbutils.widgets.get(WorkspaceHelper.PARAM_DESCRIPTION)
     dbutils.widgets.get(WorkspaceHelper.PARAM_NODE_TYPE_ID)
+    dbutils.widgets.get(WorkspaceHelper.PARAM_SPARK_VERSION)
 except:
     created_widgets=True
     
@@ -119,16 +120,32 @@ except:
     dbutils.widgets.text(WorkspaceHelper.PARAM_DESCRIPTION, "Unknown", "2. Event Description (optional)")
     
     # The node type id that the cluster pool will be bound too
-    dbutils.widgets.text(WorkspaceHelper.PARAM_NODE_TYPE_ID, "", "3. Node Type ID (optional)")
+    if dbgems.get_cloud() == "AWS":   default_node_type_id = "i3.xlarge"
+    elif dbgems.get_cloud() == "MSA": default_node_type_id = "Standard_DS3_v2"
+    elif dbgems.get_cloud() == "GCP": default_node_type_id = "n1-standard-4"
+    else: raise Exception(f"The cloud {dbgems.get_cloud()} is not supported.")
+    dbutils.widgets.text(WorkspaceHelper.PARAM_NODE_TYPE_ID, default_node_type_id, "3. Node Type ID (required)")
+    
+    # A comma seperated list of spark versions to preload in the pool
+    dbutils.widgets.text(WorkspaceHelper.PARAM_SPARK_VERSION, "11.3.x-cpu-ml-scala2.12", "4. Spark Versions (required)")
 
 # COMMAND ----------
 
 if created_widgets:
     # This has to exist in a different cell or the widgets won't be created.
-    raise Exception("Please fill out widgets at the top and then rerun.")
+    raise Exception("Please fill out widgets at the top and then reexecute \"Run All\"")
 else:
     # Start a timer so we can benchmark execution duration.
     setup_start = dbgems.clock_start()
+    
+    print("Lab ID:        ", dbgems.get_parameter(WorkspaceHelper.PARAM_LAB_ID, None) or "None")
+    print("Description:   ", dbgems.get_parameter(WorkspaceHelper.PARAM_DESCRIPTION, None) or "None")
+    
+    assert dbgems.get_parameter(WorkspaceHelper.PARAM_NODE_TYPE_ID, None) is not None, f"The parameter \"Node Type ID\" must be specified."
+    print("Node Type ID:  ", dbgems.get_parameter(WorkspaceHelper.PARAM_NODE_TYPE_ID, None) or "None")
+    
+    assert dbgems.get_parameter(WorkspaceHelper.PARAM_SPARK_VERSION, None) is not None, f"The parameter \"Spark Version\" must be specified."
+    print("Spark Versions:", dbgems.get_parameter(WorkspaceHelper.PARAM_SPARK_VERSION, None) or "None")
 
 # COMMAND ----------
 
@@ -139,48 +156,49 @@ else:
 
 # COMMAND ----------
 
-from dbacademy.dbhelper import DBAcademyHelper
-from dbacademy.dbhelper.dataset_manager_class import DatasetManager
+# DBTITLE 1,Temporarily Disabled for Testing
+# from dbacademy.dbhelper import DBAcademyHelper
+# from dbacademy.dbhelper.dataset_manager_class import DatasetManager
 
-course_config = {
-    "apache-spark-programming-with-databricks": {},
-    "data-analysis-with-databricks-sql": {
-        "data_source_name": "data-analysis-with-databricks"
-    },
-    "data-engineer-learning-path": {},
-    "data-engineering-with-databricks": {},
-    "deep-learning-with-databricks": {},
-    "introduction-to-python-for-data-science-and-data-engineering": {},
-    "ml-in-production": {},
-    "scalable-machine-learning-with-apache-spark": {},
-}
+# course_config = {
+#     "apache-spark-programming-with-databricks": {},
+#     "data-analysis-with-databricks-sql": {
+#         "data_source_name": "data-analysis-with-databricks"
+#     },
+#     "data-engineer-learning-path": {},
+#     "data-engineering-with-databricks": {},
+#     "deep-learning-with-databricks": {},
+#     "introduction-to-python-for-data-science-and-data-engineering": {},
+#     "ml-in-production": {},
+#     "scalable-machine-learning-with-apache-spark": {},
+# }
 
-for course, config in course_config.items():
-    print(course)
-    data_source_name = config.get("data_source_name", course)
+# for course, config in course_config.items():
+#     print(course)
+#     data_source_name = config.get("data_source_name", course)
     
-    # TODO - parameterize default source
-    datasets_uri = f"wasbs://courseware@dbacademy.blob.core.windows.net/{data_source_name}"
-    data_source_version = sorted([f.name[:-1] for f in dbutils.fs.ls(datasets_uri)])[-1]
-    # TODO - parameterize default directory
-    datasets_path = f"dbfs:/mnt/dbacademy-datasets/{data_source_name}/{data_source_version}"
-    data_source_uri = f"wasbs://courseware@dbacademy.blob.core.windows.net/{data_source_name}/{data_source_version}"
+#     # TODO - parameterize default source
+#     datasets_uri = f"wasbs://courseware@dbacademy.blob.core.windows.net/{data_source_name}"
+#     data_source_version = sorted([f.name[:-1] for f in dbutils.fs.ls(datasets_uri)])[-1]
+#     # TODO - parameterize default directory
+#     datasets_path = f"dbfs:/mnt/dbacademy-datasets/{data_source_name}/{data_source_version}"
+#     data_source_uri = f"wasbs://courseware@dbacademy.blob.core.windows.net/{data_source_name}/{data_source_version}"
 
-    print(f"| {data_source_uri}")
-    print(f"| {datasets_path}")
+#     print(f"| {data_source_uri}")
+#     print(f"| {datasets_path}")
     
-    remote_files = DatasetManager.list_r(data_source_uri)
+#     remote_files = DatasetManager.list_r(data_source_uri)
     
-    dataset_manager = DatasetManager(data_source_uri=data_source_uri,
-                                     staging_source_uri=None,
-                                     datasets_path=datasets_path,
-                                     remote_files=remote_files)
+#     dataset_manager = DatasetManager(data_source_uri=data_source_uri,
+#                                      staging_source_uri=None,
+#                                      datasets_path=datasets_path,
+#                                      remote_files=remote_files)
     
-    dataset_manager.install_dataset(install_min_time=None,
-                                    install_max_time=None,
-                                    reinstall_datasets=False)
+#     dataset_manager.install_dataset(install_min_time=None,
+#                                     install_max_time=None,
+#                                     reinstall_datasets=False)
     
-    print("-"*80)
+#     print("-"*80)
 
 # COMMAND ----------
 
@@ -196,12 +214,15 @@ from dbacademy.dbrest import DBAcademyRestClient
 
 client = DBAcademyRestClient()
 
+spark_version = dbgems.get_parameter(WorkspaceHelper.PARAM_SPARK_VERSION, None)
+
 instance_pool_id = ClustersHelper.create_named_instance_pool(
     client=client,
     name=ClustersHelper.POOL_DEFAULT_NAME,
     min_idle_instances=0,
     idle_instance_autotermination_minutes=15,
-    node_type_id=dbgems.get_parameter(WorkspaceHelper.PARAM_NODE_TYPE_ID, None))
+    node_type_id=dbgems.get_parameter(WorkspaceHelper.PARAM_NODE_TYPE_ID, None),
+    preloaded_spark_version=spark_version)
 
 # COMMAND ----------
 
@@ -212,8 +233,8 @@ instance_pool_id = ClustersHelper.create_named_instance_pool(
 
 # COMMAND ----------
 
-ClustersHelper.create_all_purpose_policy(client=client, instance_pool_id=instance_pool_id)
-ClustersHelper.create_jobs_policy(client=client, instance_pool_id=instance_pool_id)
+ClustersHelper.create_all_purpose_policy(client=client, instance_pool_id=instance_pool_id, spark_version=spark_version)
+ClustersHelper.create_jobs_policy(client=client, instance_pool_id=instance_pool_id, spark_version=spark_version)
 ClustersHelper.create_dlt_policy(client=client, instance_pool_id=None)
 
 # COMMAND ----------
@@ -262,11 +283,14 @@ WorkspaceHelper.add_entitlement_databricks_sql_access(client)
 
 # COMMAND ----------
 
+# DBTITLE 1,Temporarily Disabled for Testing
 # Ensures that all users can create databases on the current catalog 
 # for cases wherein the user/student is not an admin.
-from dbacademy.dbhelper.databases_helper_class import DatabasesHelper
-job_id = DatabasesHelper.configure_permissions(client, "Configure-Permissions", spark_version="10.4.x-scala2.12")
-client.jobs().delete_by_id(job_id)
+
+# from dbacademy.dbhelper.databases_helper_class import DatabasesHelper
+
+# job_id = DatabasesHelper.configure_permissions(client, "Configure-Permissions", spark_version="10.4.x-scala2.12")
+# client.jobs().delete_by_id(job_id)
 
 # COMMAND ----------
 
