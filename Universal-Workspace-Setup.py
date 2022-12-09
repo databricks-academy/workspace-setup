@@ -39,7 +39,7 @@ def validate_libraries():
 
 # DBTITLE 1,build_pip_command()
 def build_pip_command():
-    version = spark.conf.get("dbacademy.library.version", "v3.0.3")
+    version = spark.conf.get("dbacademy.library.version", "v3.0.5")
 
     try:
         from dbacademy import dbgems
