@@ -162,48 +162,48 @@ else:
 # COMMAND ----------
 
 # DBTITLE 1,Temporarily Disabled for Testing
-# from dbacademy.dbhelper import DBAcademyHelper
-# from dbacademy.dbhelper.dataset_manager_class import DatasetManager
+from dbacademy.dbhelper import DBAcademyHelper
+from dbacademy.dbhelper.dataset_manager_class import DatasetManager
 
-# course_config = {
-#     "apache-spark-programming-with-databricks": {},
-#     "data-analysis-with-databricks-sql": {
-#         "data_source_name": "data-analysis-with-databricks"
-#     },
-#     "data-engineer-learning-path": {},
-#     "data-engineering-with-databricks": {},
-#     "deep-learning-with-databricks": {},
-#     "introduction-to-python-for-data-science-and-data-engineering": {},
-#     "ml-in-production": {},
-#     "scalable-machine-learning-with-apache-spark": {},
-# }
+course_config = {
+    "apache-spark-programming-with-databricks": {},
+    "data-analysis-with-databricks-sql": {
+        "data_source_name": "data-analysis-with-databricks"
+    },
+    "data-engineer-learning-path": {},
+    "data-engineering-with-databricks": {},
+    "deep-learning-with-databricks": {},
+    "introduction-to-python-for-data-science-and-data-engineering": {},
+    "ml-in-production": {},
+    "scalable-machine-learning-with-apache-spark": {},
+}
 
-# for course, config in course_config.items():
-#     print(course)
-#     data_source_name = config.get("data_source_name", course)
+for course, config in course_config.items():
+    print(course)
+    data_source_name = config.get("data_source_name", course)
     
-#     # TODO - parameterize default source
-#     datasets_uri = f"wasbs://courseware@dbacademy.blob.core.windows.net/{data_source_name}"
-#     data_source_version = sorted([f.name[:-1] for f in dbutils.fs.ls(datasets_uri)])[-1]
-#     # TODO - parameterize default directory
-#     datasets_path = f"dbfs:/mnt/dbacademy-datasets/{data_source_name}/{data_source_version}"
-#     data_source_uri = f"wasbs://courseware@dbacademy.blob.core.windows.net/{data_source_name}/{data_source_version}"
+    # TODO - parameterize default source
+    datasets_uri = f"wasbs://courseware@dbacademy.blob.core.windows.net/{data_source_name}"
+    data_source_version = sorted([f.name[:-1] for f in dbutils.fs.ls(datasets_uri)])[-1]
+    # TODO - parameterize default directory
+    datasets_path = f"dbfs:/mnt/dbacademy-datasets/{data_source_name}/{data_source_version}"
+    data_source_uri = f"wasbs://courseware@dbacademy.blob.core.windows.net/{data_source_name}/{data_source_version}"
 
-#     print(f"| {data_source_uri}")
-#     print(f"| {datasets_path}")
+    print(f"| {data_source_uri}")
+    print(f"| {datasets_path}")
     
-#     remote_files = DatasetManager.list_r(data_source_uri)
+    remote_files = DatasetManager.list_r(data_source_uri)
     
-#     dataset_manager = DatasetManager(data_source_uri=data_source_uri,
-#                                      staging_source_uri=None,
-#                                      datasets_path=datasets_path,
-#                                      remote_files=remote_files)
+    dataset_manager = DatasetManager(data_source_uri=data_source_uri,
+                                     staging_source_uri=None,
+                                     datasets_path=datasets_path,
+                                     remote_files=remote_files)
     
-#     dataset_manager.install_dataset(install_min_time=None,
-#                                     install_max_time=None,
-#                                     reinstall_datasets=False)
+    dataset_manager.install_dataset(install_min_time=None,
+                                    install_max_time=None,
+                                    reinstall_datasets=False)
     
-#     print("-"*80)
+    print("-"*80)
 
 # COMMAND ----------
 
@@ -307,10 +307,11 @@ WorkspaceHelper.add_entitlement_databricks_sql_access(client)
 # Ensures that all users can create databases on the current catalog 
 # for cases wherein the user/student is not an admin.
 
-# from dbacademy.dbhelper.databases_helper_class import DatabasesHelper
+from dbacademy.dbhelper.databases_helper_class import DatabasesHelper
 
-# job_id = DatabasesHelper.configure_permissions(client, "Configure-Permissions", spark_version="10.4.x-scala2.12")
-# client.jobs().delete_by_id(job_id)
+job_id = DatabasesHelper.configure_permissions(client, "Configure-Permissions", spark_version="10.4.x-scala2.12")
+
+client.jobs().delete_by_id(job_id)
 
 # COMMAND ----------
 
