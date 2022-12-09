@@ -138,14 +138,19 @@ else:
     # Start a timer so we can benchmark execution duration.
     setup_start = dbgems.clock_start()
     
-    print("Lab ID:        ", dbgems.get_parameter(WorkspaceHelper.PARAM_LAB_ID, None) or "None")
-    print("Description:   ", dbgems.get_parameter(WorkspaceHelper.PARAM_DESCRIPTION, None) or "None")
+    lab_id = dbgems.get_parameter(WorkspaceHelper.PARAM_LAB_ID, None)
+    print("Lab ID:        ", lab_id or "None")
     
-    assert dbgems.get_parameter(WorkspaceHelper.PARAM_NODE_TYPE_ID, None) is not None, f"The parameter \"Node Type ID\" must be specified."
-    print("Node Type ID:  ", dbgems.get_parameter(WorkspaceHelper.PARAM_NODE_TYPE_ID, None) or "None")
+    workspace_description = dbgems.get_parameter(WorkspaceHelper.PARAM_DESCRIPTION, None)
+    print("Description:   ", workspace_description or "None")
     
-    assert dbgems.get_parameter(WorkspaceHelper.PARAM_SPARK_VERSION, None) is not None, f"The parameter \"Spark Version\" must be specified."
-    print("Spark Versions:", dbgems.get_parameter(WorkspaceHelper.PARAM_SPARK_VERSION, None) or "None")
+    node_type_id = dbgems.get_parameter(WorkspaceHelper.PARAM_NODE_TYPE_ID, None)
+    assert node_type_id is not None, f"The parameter \"Node Type ID\" must be specified."
+    print("Node Type ID:  ", node_type_id or "None")
+    
+    spark_version = dbgems.get_parameter(WorkspaceHelper.PARAM_SPARK_VERSION, None)
+    assert spark_version is not None, f"The parameter \"Spark Version\" must be specified."
+    print("Spark Versions:", spark_version or "None")
 
 # COMMAND ----------
 
@@ -214,13 +219,15 @@ from dbacademy.dbrest import DBAcademyRestClient
 
 client = DBAcademyRestClient()
 
-spark_version = dbgems.get_parameter(WorkspaceHelper.PARAM_SPARK_VERSION, None)
-
 instance_pool_id = ClustersHelper.create_named_instance_pool(
     client=client,
     name=ClustersHelper.POOL_DEFAULT_NAME,
     min_idle_instances=0,
     idle_instance_autotermination_minutes=15,
+    lab_id=lab_id,
+    workspace_description=workspace_description,
+    workspace_name=WorkspaceHelper.get_workspace_name(),
+    org_id=dbgems.get_org_id(),
     node_type_id=dbgems.get_parameter(WorkspaceHelper.PARAM_NODE_TYPE_ID, None),
     preloaded_spark_version=spark_version)
 
@@ -233,9 +240,22 @@ instance_pool_id = ClustersHelper.create_named_instance_pool(
 
 # COMMAND ----------
 
-ClustersHelper.create_all_purpose_policy(client=client, instance_pool_id=instance_pool_id, spark_version=spark_version)
-ClustersHelper.create_jobs_policy(client=client, instance_pool_id=instance_pool_id, spark_version=spark_version)
-ClustersHelper.create_dlt_policy(client=client, instance_pool_id=None)
+ClustersHelper.create_all_purpose_policy(client=client, 
+                                         instance_pool_id=instance_pool_id, 
+                                         spark_version=spark_version,
+                                         autotermination_minutes_max=180,
+                                         autotermination_minutes_default=120)
+
+ClustersHelper.create_jobs_policy(client=client, 
+                                  instance_pool_id=instance_pool_id, 
+                                  spark_version=spark_version)
+
+ClustersHelper.create_dlt_policy(client=client, 
+                                lab_id=lab_id, 
+                                workspace_description=workspace_description, 
+                                workspace_name=WorkspaceHelper.get_workspace_name(),
+                                org_id=dbgems.get_org_id())
+
 
 # COMMAND ----------
 
