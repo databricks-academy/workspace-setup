@@ -39,7 +39,7 @@ def validate_libraries():
 
 # DBTITLE 1,build_pip_command()
 def build_pip_command():
-    version = spark.conf.get("dbacademy.library.version", "v3.0.11")
+    version = spark.conf.get("dbacademy.library.version", "v3.0.13")
 
     try:
         from dbacademy import dbgems
@@ -203,7 +203,7 @@ for course, config in course_config.items():
                                     install_max_time=None,
                                     reinstall_datasets=False)
     
-    print("-"*80)
+    print("\n"+("-"*80)+"\n")
 
 # COMMAND ----------
 
@@ -303,7 +303,6 @@ WorkspaceHelper.add_entitlement_databricks_sql_access(client)
 
 # COMMAND ----------
 
-# DBTITLE 1,Temporarily Disabled for Testing
 # Ensures that all users can create databases on the current catalog 
 # for cases wherein the user/student is not an admin.
 
@@ -322,81 +321,99 @@ client.jobs().delete_by_id(job_id)
 
 # COMMAND ----------
 
-directory = "/Repos/DBAcademy"
-if client.workspace().get_status(directory) is None:
-    print(f"Creating: {directory}")
-    client.workspace.mkdirs(directory)
+# directory = "/Repos/DBAcademy"
+# if client.workspace().get_status(directory) is None:
+#     print(f"Creating: {directory}")
+#     client.workspace.mkdirs(directory)
     
-repo_dir = f"{directory}/workspace-setup"
-if client.workspace().get_status(repo_dir) is None:
-    print(f"Importing to {repo_dir}")
-    repo_url = "https://github.com/databricks-academy/workspace-setup.git"
-    response = client.repos.create(path=repo_dir, url=repo_url)
+# repo_dir = f"{directory}/workspace-setup"
+# if client.workspace().get_status(repo_dir) is None:
+#     print(f"Importing to {repo_dir}")
+#     repo_url = "https://github.com/databricks-academy/workspace-setup.git"
+#     response = client.repos.create(path=repo_dir, url=repo_url)
 
 # COMMAND ----------
+
+from dbacademy.dbrest.jobs import JobConfig
+from dbacademy.dbrest.clusters import ClusterConfig
 
 job_name = "DBAcademy Workspace-Setup"
+job_config = JobConfig(job_name=job_name, timeout_seconds=15*60)
 
-params = {
-    "name": job_name,
-    "timeout_seconds": 7200,
-    "max_concurrent_runs": 1,
-    "tasks": [
-        {
-            "task_key": "Workspace-Setup",
-            "notebook_task": {
-                "notebook_path": "Workspace-Setup",
-                "source": "GIT"
-            },
-            "job_cluster_key": "Workspace-Setup-Cluster",
-            "timeout_seconds": 7200,
-        }
-    ],
-    "job_clusters": [
-        {
-            "job_cluster_key": "Workspace-Setup-Cluster",
-            "new_cluster": {
-                "spark_version": "11.3.x-scala2.12",
-                "spark_conf": {
-                    "spark.master": "local[*, 4]",
-                    "spark.databricks.cluster.profile": "singleNode"
-                },
-                "custom_tags": {
-                    "ResourceClass": "SingleNode"
-                },
-                "spark_env_vars": {
-                    "PYSPARK_PYTHON": "/databricks/python3/bin/python3"
-                },
-                "data_security_mode": "SINGLE_USER",
-                "runtime_engine": "STANDARD",
-                "num_workers": 0
-            }
-        }
-    ],
-    "git_source": {
-        "git_url": "https://github.com/databricks-academy/workspace-setup.git",
-        "git_provider": "gitHub",
-        "git_branch": "published"
-    },
-    "format": "MULTI_TASK"
-}
+job_config.git_branch(provider="gitHub", url="https://github.com/databricks-academy/workspace-setup.git", branch="published")
 
-cluster_params = params.get("job_clusters")[0].get("new_cluster")
-if client.clusters().get_current_instance_pool_id() is not None:
-    cluster_params["instance_pool_id"] = client.clusters().get_current_instance_pool_id()
-else:
-    cluster_params["node_type_id"] = client.clusters().get_current_node_type_id()
+task_config = job_config.add_task(task_key="Workspace-Setup", description="This job is used to configure the workspace per Databricks Academy's courseware requirements")
+task_config.task.notebook("Workspace-Setup", source="GIT", base_parameters={
+    WorkspaceHelper.PARAM_LAB_ID: lab_id,
+    WorkspaceHelper.PARAM_DESCRIPTION: workspace_description,
+    WorkspaceHelper.PARAM_NODE_TYPE_ID: node_type_id,
+    WorkspaceHelper.PARAM_SPARK_VERSION: spark_version
+})
+task_config.cluster.new(ClusterConfig(cluster_name=None,
+                                      spark_version="11.3.x-scala2.12",
+                                      node_type_id="i3.xlarge",
+                                      num_workers=0,
+                                      autotermination_minutes=None,
+                                      data_security_mode="NONE"))
 
 # COMMAND ----------
 
-job = client.jobs.get_by_name(job_name)
+# job_name = "DBAcademy Workspace-Setup"
 
-if job is not None:
-    print("Job already exists.")
-    job_id = job.get("job_id")
-else:
-    print("Creating new job.")
-    job_id = client.jobs().create_2_1(params)["job_id"]
+# params = {
+#     "name": job_name,
+#     "timeout_seconds": 7200,
+#     "max_concurrent_runs": 1,
+#     "tasks": [
+#         {
+#             "task_key": "Workspace-Setup",
+#             "notebook_task": {
+#                 "notebook_path": "Workspace-Setup",
+#                 "source": "GIT"
+#             },
+#             "job_cluster_key": "Workspace-Setup-Cluster",
+#             "timeout_seconds": 7200,
+#         }
+#     ],
+#     "job_clusters": [
+#         {
+#             "job_cluster_key": "Workspace-Setup-Cluster",
+#             "new_cluster": {
+#                 "spark_version": "11.3.x-scala2.12",
+#                 "spark_conf": {
+#                     "spark.master": "local[*, 4]",
+#                     "spark.databricks.cluster.profile": "singleNode"
+#                 },
+#                 "custom_tags": {
+#                     "ResourceClass": "SingleNode"
+#                 },
+#                 "spark_env_vars": {
+#                     "PYSPARK_PYTHON": "/databricks/python3/bin/python3"
+#                 },
+#                 "data_security_mode": "SINGLE_USER",
+#                 "runtime_engine": "STANDARD",
+#                 "num_workers": 0
+#             }
+#         }
+#     ],
+#     "git_source": {
+#         "git_url": "https://github.com/databricks-academy/workspace-setup.git",
+#         "git_provider": "gitHub",
+#         "git_branch": "published"
+#     },
+#     "format": "MULTI_TASK"
+# }
+
+# cluster_params = params.get("job_clusters")[0].get("new_cluster")
+# if client.clusters().get_current_instance_pool_id() is not None:
+#     cluster_params["instance_pool_id"] = client.clusters().get_current_instance_pool_id()
+# else:
+#     cluster_params["node_type_id"] = client.clusters().get_current_node_type_id()
+
+# COMMAND ----------
+
+client.jobs.delete_by_name(job_name, success_only=False)
+job_id = client.jobs.create_from_config(job_config)
 
 dbgems.display_html(f"""
 <html style="margin:0"><body style="margin:0"><div style="margin:0">
