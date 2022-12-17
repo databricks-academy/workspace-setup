@@ -203,7 +203,7 @@ for course, config in course_config.items():
                                     install_max_time=None,
                                     reinstall_datasets=False)
     
-    print("\n"+("-"*80)+"\n")
+    print("\n"+("-"*100)+"\n")
 
 # COMMAND ----------
 
@@ -255,7 +255,6 @@ ClustersHelper.create_dlt_policy(client=client,
                                 workspace_description=workspace_description, 
                                 workspace_name=WorkspaceHelper.get_workspace_name(),
                                 org_id=dbgems.get_org_id())
-
 
 # COMMAND ----------
 
