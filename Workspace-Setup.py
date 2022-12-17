@@ -289,7 +289,6 @@ WarehousesHelper.create_sql_warehouse(client=client,
 WorkspaceHelper.add_entitlement_workspace_access(client)
 WorkspaceHelper.add_entitlement_databricks_sql_access(client)
 # WorkspaceHelper.add_entitlement_allow_cluster_create(client)
-# WorkspaceHelper.add_entitlement_allow_instance_pool_create(client)
 
 # COMMAND ----------
 
@@ -319,6 +318,8 @@ client.jobs().delete_by_id(job_id)
 # MAGIC Creates an unscheduled job referencing this specific notebook.
 
 # COMMAND ----------
+
+# This wasn't actually needed to create the job.
 
 # directory = "/Repos/DBAcademy"
 # if client.workspace().get_status(directory) is None:
