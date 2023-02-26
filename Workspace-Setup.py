@@ -375,8 +375,3 @@ else:
 # COMMAND ----------
 
 print(f"Setup completed {dbgems.clock_stopped(setup_start)}")
-
-# COMMAND ----------
-
-for key, value in dbgems.get_tags().items():
-    print(f"{key}: {value}")
