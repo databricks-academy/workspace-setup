@@ -358,18 +358,19 @@ task_config.cluster.new(JobClusterConfig(cloud=Cloud.current_cloud(),
 
 if dbgems.get_tag("jobName") == WorkspaceHelper.BOOTSTRAP_JOB_NAME:
     # Create the real job, deleting it if it already exists.
-    print(f"Deleting {job_name}"")
+    print(f"Deleting {job_name}")
     client.jobs.delete_by_name(job_name, success_only=False)
+    
+    print(f"Creating {job_name}")
     job_id = client.jobs.create_from_config(job_config)
+    dbgems.display_html(f"""
+    <html style="margin:0"><body style="margin:0"><div style="margin:0">
+        See <a href="/#job/{job_id}" target="_blank">{job_name} ({job_id})</a>
+    </div></body></html>
+    """)
 else:
-    print(f"Deleting {WorkspaceHelper.BOOTSTRAP_JOB_NAME}"")
+    print(f"Deleting {WorkspaceHelper.BOOTSTRAP_JOB_NAME}")
     client.jobs.delete_by_name(WorkspaceHelper.BOOTSTRAP_JOB_NAME, success_only=False)
-
-dbgems.display_html(f"""
-<html style="margin:0"><body style="margin:0"><div style="margin:0">
-    See <a href="/#job/{job_id}" target="_blank">{job_name} ({job_id})</a>
-</div></body></html>
-""")
 
 # COMMAND ----------
 
