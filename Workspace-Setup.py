@@ -315,14 +315,14 @@ WorkspaceHelper.add_entitlement_databricks_sql_access(client)
 
 # COMMAND ----------
 
-# # Ensures that all users can create databases on the current catalog 
-# # for cases wherein the user/student is not an admin.
+# Ensures that all users can create databases on the current catalog 
+# for cases wherein the user/student is not an admin.
 
-# from dbacademy.dbhelper.databases_helper_class import DatabasesHelper
+from dbacademy.dbhelper.databases_helper_class import DatabasesHelper
 
-# job_id = DatabasesHelper.configure_permissions(client, "Configure-Permissions", spark_version="10.4.x-scala2.12")
+job_id = DatabasesHelper.configure_permissions(client, "Configure-Permissions", spark_version="10.4.x-scala2.12")
 
-# client.jobs().delete_by_id(job_id)
+client.jobs().delete_by_id(job_id)
 
 # COMMAND ----------
 
