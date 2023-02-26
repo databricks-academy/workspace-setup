@@ -39,7 +39,7 @@ def validate_libraries():
 
 # DBTITLE 1,build_pip_command()
 def build_pip_command():
-    version = spark.conf.get("dbacademy.library.version", "v3.0.13")
+    version = spark.conf.get("dbacademy.library.version", "v3.0.40")
 
     try:
         from dbacademy import dbgems
@@ -102,6 +102,7 @@ print(pip_command)
 # COMMAND ----------
 
 from dbacademy import dbgems
+from dbacademy.common import Cloud
 from dbacademy.dbhelper import WorkspaceHelper
 
 try:
@@ -110,6 +111,7 @@ try:
     dbutils.widgets.get(WorkspaceHelper.PARAM_DESCRIPTION)
     dbutils.widgets.get(WorkspaceHelper.PARAM_NODE_TYPE_ID)
     dbutils.widgets.get(WorkspaceHelper.PARAM_SPARK_VERSION)
+    dbutils.widgets.get(WorkspaceHelper.PARAM_DATASETS)
 except:
     created_widgets=True
     
@@ -120,14 +122,17 @@ except:
     dbutils.widgets.text(WorkspaceHelper.PARAM_DESCRIPTION, "Unknown", "2. Event Description (optional)")
     
     # The node type id that the cluster pool will be bound too
-    if dbgems.get_cloud() == "AWS":   default_node_type_id = "i3.xlarge"
-    elif dbgems.get_cloud() == "MSA": default_node_type_id = "Standard_DS3_v2"
-    elif dbgems.get_cloud() == "GCP": default_node_type_id = "n1-standard-4"
-    else: raise Exception(f"The cloud {dbgems.get_cloud()} is not supported.")
+    if Cloud.current_cloud() == "AWS":   default_node_type_id = "i3.xlarge"
+    elif Cloud.current_cloud() == "MSA": default_node_type_id = "Standard_DS3_v2"
+    elif Cloud.current_cloud() == "GCP": default_node_type_id = "n1-standard-4"
+    else: raise Exception(f"The cloud {Cloud.current_cloud()} is not supported.")
     dbutils.widgets.text(WorkspaceHelper.PARAM_NODE_TYPE_ID, default_node_type_id, "3. Node Type ID (required)")
     
     # A comma seperated list of spark versions to preload in the pool
     dbutils.widgets.text(WorkspaceHelper.PARAM_SPARK_VERSION, "11.3.x-cpu-ml-scala2.12", "4. Spark Versions (required)")
+    
+    # A comma seperated list of spark versions to preload in the pool
+    dbutils.widgets.text(WorkspaceHelper.PARAM_DATASETS, "", "4. Datasets (defaults to all)")
 
 # COMMAND ----------
 
@@ -151,6 +156,9 @@ else:
     spark_version = dbgems.get_parameter(WorkspaceHelper.PARAM_SPARK_VERSION, None)
     assert spark_version is not None, f"The parameter \"Spark Version\" must be specified."
     print("Spark Versions:", spark_version or "None")
+    
+    installed_datasets = dbgems.get_parameter(WorkspaceHelper.PARAM_DATASETS, None)
+    print("Datasets:      ", installed_datasets or "All")    
 
 # COMMAND ----------
 
@@ -165,29 +173,35 @@ else:
 from dbacademy.dbhelper import DBAcademyHelper
 from dbacademy.dbhelper.dataset_manager_class import DatasetManager
 
-course_config = {
-    "apache-spark-programming-with-databricks": {},
-    "data-analysis-with-databricks-sql": {
-        "data_source_name": "data-analysis-with-databricks"
-    },
-    "data-engineer-learning-path": {},
-    "data-engineering-with-databricks": {},
-    "deep-learning-with-databricks": {},
-    "introduction-to-python-for-data-science-and-data-engineering": {},
-    "ml-in-production": {},
-    "scalable-machine-learning-with-apache-spark": {},
-}
+if installed_datasets is not None:
+    datasets = installed_datasets.split(",")
+else:
+    datasets = [
+        "example-course",
+        "apache-spark-programming-with-databricks",
+        "data-analysis-with-databricks",
+        "data-engineer-learning-path",
+        "data-engineering-with-databricks",
+        "deep-learning-with-databricks",
+        "introduction-to-python-for-data-science-and-data-engineering",
+        "ml-in-production",
+        "scalable-machine-learning-with-apache-spark",
+    ]
+print(f"Installing {datasets}")
 
-for course, config in course_config.items():
-    print(course)
-    data_source_name = config.get("data_source_name", course)
+
+for dataset in datasets:
+    if ":" in dataset:
+        dataset, data_source_version = dataset.split(":")
+    else:
+        data_source_version = None
+
+    if not data_source_version:
+        datasets_uri = f"wasbs://courseware@dbacademy.blob.core.windows.net/{dataset}"
+        data_source_version = sorted([f.name[:-1] for f in dbutils.fs.ls(datasets_uri)])[-1]
     
-    # TODO - parameterize default source
-    datasets_uri = f"wasbs://courseware@dbacademy.blob.core.windows.net/{data_source_name}"
-    data_source_version = sorted([f.name[:-1] for f in dbutils.fs.ls(datasets_uri)])[-1]
-    # TODO - parameterize default directory
-    datasets_path = f"dbfs:/mnt/dbacademy-datasets/{data_source_name}/{data_source_version}"
-    data_source_uri = f"wasbs://courseware@dbacademy.blob.core.windows.net/{data_source_name}/{data_source_version}"
+    datasets_path = f"dbfs:/mnt/dbacademy-datasets/{dataset}/{data_source_version}"
+    data_source_uri = f"wasbs://courseware@dbacademy.blob.core.windows.net/{dataset}/{data_source_version}"
 
     print(f"| {data_source_uri}")
     print(f"| {datasets_path}")
@@ -319,25 +333,10 @@ client.jobs().delete_by_id(job_id)
 
 # COMMAND ----------
 
-# This wasn't actually needed to create the job.
-
-# directory = "/Repos/DBAcademy"
-# if client.workspace().get_status(directory) is None:
-#     print(f"Creating: {directory}")
-#     client.workspace.mkdirs(directory)
-    
-# repo_dir = f"{directory}/workspace-setup"
-# if client.workspace().get_status(repo_dir) is None:
-#     print(f"Importing to {repo_dir}")
-#     repo_url = "https://github.com/databricks-academy/workspace-setup.git"
-#     response = client.repos.create(path=repo_dir, url=repo_url)
-
-# COMMAND ----------
-
 from dbacademy.dbrest.jobs import JobConfig
 from dbacademy.dbrest.clusters import ClusterConfig
 
-job_name = "DBAcademy Workspace-Setup"
+job_name = WorkspaceHelper.WORKSPACE_SETUP_JOB_NAME
 job_config = JobConfig(job_name=job_name, timeout_seconds=15*60)
 
 job_config.git_branch(provider="gitHub", url="https://github.com/databricks-academy/workspace-setup.git", branch="published")
@@ -358,69 +357,20 @@ task_config.cluster.new(ClusterConfig(cluster_name=None,
 
 # COMMAND ----------
 
-# job_name = "DBAcademy Workspace-Setup"
+# client.jobs.delete_by_name(job_name, success_only=False)
+# job_id = client.jobs.create_from_config(job_config)
 
-# params = {
-#     "name": job_name,
-#     "timeout_seconds": 7200,
-#     "max_concurrent_runs": 1,
-#     "tasks": [
-#         {
-#             "task_key": "Workspace-Setup",
-#             "notebook_task": {
-#                 "notebook_path": "Workspace-Setup",
-#                 "source": "GIT"
-#             },
-#             "job_cluster_key": "Workspace-Setup-Cluster",
-#             "timeout_seconds": 7200,
-#         }
-#     ],
-#     "job_clusters": [
-#         {
-#             "job_cluster_key": "Workspace-Setup-Cluster",
-#             "new_cluster": {
-#                 "spark_version": "11.3.x-scala2.12",
-#                 "spark_conf": {
-#                     "spark.master": "local[*, 4]",
-#                     "spark.databricks.cluster.profile": "singleNode"
-#                 },
-#                 "custom_tags": {
-#                     "ResourceClass": "SingleNode"
-#                 },
-#                 "spark_env_vars": {
-#                     "PYSPARK_PYTHON": "/databricks/python3/bin/python3"
-#                 },
-#                 "data_security_mode": "SINGLE_USER",
-#                 "runtime_engine": "STANDARD",
-#                 "num_workers": 0
-#             }
-#         }
-#     ],
-#     "git_source": {
-#         "git_url": "https://github.com/databricks-academy/workspace-setup.git",
-#         "git_provider": "gitHub",
-#         "git_branch": "published"
-#     },
-#     "format": "MULTI_TASK"
-# }
-
-# cluster_params = params.get("job_clusters")[0].get("new_cluster")
-# if client.clusters().get_current_instance_pool_id() is not None:
-#     cluster_params["instance_pool_id"] = client.clusters().get_current_instance_pool_id()
-# else:
-#     cluster_params["node_type_id"] = client.clusters().get_current_node_type_id()
-
-# COMMAND ----------
-
-client.jobs.delete_by_name(job_name, success_only=False)
-job_id = client.jobs.create_from_config(job_config)
-
-dbgems.display_html(f"""
-<html style="margin:0"><body style="margin:0"><div style="margin:0">
-    See <a href="/#job/{job_id}" target="_blank">{job_name} ({job_id})</a>
-</div></body></html>
-""")
+# dbgems.display_html(f"""
+# <html style="margin:0"><body style="margin:0"><div style="margin:0">
+#     See <a href="/#job/{job_id}" target="_blank">{job_name} ({job_id})</a>
+# </div></body></html>
+# """)
 
 # COMMAND ----------
 
 print(f"Setup completed {dbgems.clock_stopped(setup_start)}")
+
+# COMMAND ----------
+
+for tag in dbgems.get_tags():
+    print(tag)
