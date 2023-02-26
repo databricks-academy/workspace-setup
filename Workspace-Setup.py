@@ -39,7 +39,7 @@ def validate_libraries():
 
 # DBTITLE 1,build_pip_command()
 def build_pip_command():
-    version = spark.conf.get("dbacademy.library.version", "v3.0.40")
+    version = spark.conf.get("dbacademy.library.version", "main")
 
     try:
         from dbacademy import dbgems
@@ -315,14 +315,14 @@ WorkspaceHelper.add_entitlement_databricks_sql_access(client)
 
 # COMMAND ----------
 
-# Ensures that all users can create databases on the current catalog 
-# for cases wherein the user/student is not an admin.
+# # Ensures that all users can create databases on the current catalog 
+# # for cases wherein the user/student is not an admin.
 
-from dbacademy.dbhelper.databases_helper_class import DatabasesHelper
+# from dbacademy.dbhelper.databases_helper_class import DatabasesHelper
 
-job_id = DatabasesHelper.configure_permissions(client, "Configure-Permissions", spark_version="10.4.x-scala2.12")
+# job_id = DatabasesHelper.configure_permissions(client, "Configure-Permissions", spark_version="10.4.x-scala2.12")
 
-client.jobs().delete_by_id(job_id)
+# client.jobs().delete_by_id(job_id)
 
 # COMMAND ----------
 
@@ -334,7 +334,7 @@ client.jobs().delete_by_id(job_id)
 # COMMAND ----------
 
 from dbacademy.dbrest.jobs import JobConfig
-from dbacademy.dbrest.clusters import ClusterConfig
+from dbacademy.dbrest.clusters import JobClusterConfig
 
 job_name = WorkspaceHelper.WORKSPACE_SETUP_JOB_NAME
 job_config = JobConfig(job_name=job_name, timeout_seconds=15*60)
@@ -348,23 +348,22 @@ task_config.task.notebook("Workspace-Setup", source="GIT", base_parameters={
     WorkspaceHelper.PARAM_NODE_TYPE_ID: node_type_id,
     WorkspaceHelper.PARAM_SPARK_VERSION: spark_version
 })
-task_config.cluster.new(ClusterConfig(cluster_name=None,
-                                      spark_version="11.3.x-scala2.12",
-                                      node_type_id="i3.xlarge",
-                                      num_workers=0,
-                                      autotermination_minutes=None,
-                                      data_security_mode="NONE"))
+task_config.cluster.new(JobClusterConfig(cloud=Cloud.current_cloud(),
+                                         spark_version="11.3.x-scala2.12",
+                                         node_type_id="i3.xlarge",
+                                         num_workers=0,
+                                         autotermination_minutes=None))
 
 # COMMAND ----------
 
-# client.jobs.delete_by_name(job_name, success_only=False)
-# job_id = client.jobs.create_from_config(job_config)
+client.jobs.delete_by_name(job_name, success_only=False)
+job_id = client.jobs.create_from_config(job_config)
 
-# dbgems.display_html(f"""
-# <html style="margin:0"><body style="margin:0"><div style="margin:0">
-#     See <a href="/#job/{job_id}" target="_blank">{job_name} ({job_id})</a>
-# </div></body></html>
-# """)
+dbgems.display_html(f"""
+<html style="margin:0"><body style="margin:0"><div style="margin:0">
+    See <a href="/#job/{job_id}" target="_blank">{job_name} ({job_id})</a>
+</div></body></html>
+""")
 
 # COMMAND ----------
 
