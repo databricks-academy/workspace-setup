@@ -7,8 +7,8 @@
 # MAGIC * Updating user-specific grants such that they can create databases/schemas against the current catalog when they are not workspace-admins.
 # MAGIC * Configures three cluster policies:
 # MAGIC     * **DBAcademy** - which should be used on clusters running standard notebooks.
-# MAGIC     * **DBAcademy Jobs-Only** - which should be used on workflows/jobs
-# MAGIC     * **DBAcademy DLT-Only** - which should be used on DLT piplines (automatically applied)
+# MAGIC     * **DBAcademy Jobs** - which should be used on workflows/jobs
+# MAGIC     * **DBAcademy DLT** - which should be used on DLT piplines (automatically applied)
 # MAGIC * Create or update the shared **DBAcademy Warehouse** for use in Databricks SQL exercises
 # MAGIC * Create the Instance Pool **DBAcademy** for use by students and the "student" and "jobs" policies.
 # MAGIC 
@@ -17,77 +17,56 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Define Utility Methods
-# MAGIC The following two utility methods work together ensure that the dbacademy library is reachable from this workspace and then define the pip command later used to attach the library to the current cluster..
+# MAGIC ## Validate Libraries and Build PIP Command
+# MAGIC The following code works to ensure that the dbacademy library is reachable from this workspace and then define the pip command used to attach that library to the current cluster.
 
 # COMMAND ----------
 
-# DBTITLE 1,validate_libraries()
-def validate_libraries():
-    import requests
-    try:
-        site = "https://github.com/databricks-academy/dbacademy"
-        response = requests.get(site)
-        error = f"Unable to access GitHub or PyPi resources (HTTP {response.status_code} for {site})."
-        assert response.status_code == 200, "{error} Please see the \"Troubleshooting | {section}\" section of the \"Version Info\" notebook for more information.".format(error=error, section="Cannot Install Libraries")
-    except Exception as e:
-        if type(e) is AssertionError: raise e
-        error = f"Unable to access GitHub or PyPi resources ({site})."
-        raise AssertionError("{error} Please see the \"Troubleshooting | {section}\" section of the \"Version Info\" notebook for more information.".format(error=error, section="Cannot Install Libraries")) from e
+import requests
 
-# COMMAND ----------
+version = spark.conf.get("dbacademy.library.version", "v3.0.43")
 
-# DBTITLE 1,build_pip_command()
-def build_pip_command():
-    version = spark.conf.get("dbacademy.library.version", "v3.0.41")
+try:
+    from dbacademy import dbgems
 
-    try:
-        from dbacademy import dbgems
+    installed_version = dbgems.lookup_current_module_version("dbacademy")
+    if installed_version == version:
+        pip_command = "list --quiet"  # Skipping pip install of pre-installed python library
+    else:
+        print(f"WARNING: The wrong version of dbacademy is attached to this cluster. Expected {version}, found {installed_version}.")
+        print(f"Installing the correct version.")
+        raise Exception("Forcing re-install")
 
-        installed_version = dbgems.lookup_current_module_version("dbacademy")
-        if installed_version == version:
-            pip_command = (
-                "list --quiet"  # Skipping pip install of pre-installed python library
-            )
-        else:
-            print(
-                f"WARNING: The wrong version of dbacademy is attached to this cluster. Expected {version}, found {installed_version}."
-            )
-            print(f"Installing the correct version.")
-            raise Exception("Forcing re-install")
+except Exception as e:
+    # The import fails if library is not attached to cluster
+    if not version.startswith("v"):
+        library_url = f"git+https://github.com/databricks-academy/dbacademy@{version}"
+    else:
+        library_url = f"https://github.com/databricks-academy/dbacademy/releases/download/{version}/dbacademy-{version[1:]}-py3-none-any.whl"
 
-    except Exception as e:
-        # The import fails if library is not attached to cluster
-        if not version.startswith("v"):
-            library_url = (
-                f"git+https://github.com/databricks-academy/dbacademy@{version}"
-            )
-        else:
-            library_url = f"https://github.com/databricks-academy/dbacademy/releases/download/{version}/dbacademy-{version[1:]}-py3-none-any.whl"
+    default_command = f"install --quiet --disable-pip-version-check {library_url}"
+    pip_command = spark.conf.get("dbacademy.library.install", default_command)
 
-        default_command = f"install --quiet --disable-pip-version-check {library_url}"
-        pip_command = spark.conf.get("dbacademy.library.install", default_command)
+    if pip_command != default_command:
+        print(f"WARNING: Using alternative library installation:\n| default: %pip {default_command}\n| current: %pip {pip_command}")
+    else:
+        # We are using the default libraries; next we need to verify that we can reach those libraries.
+        try:
+            site = "https://github.com/databricks-academy/dbacademy"
+            response = requests.get(site)
+            assert response.status_code == 200, f"Unable to access GitHub or PyPi resources (HTTP {response.status_code} for {site})."
+        except Exception as e:
+            if type(e) is AssertionError: raise e
+            raise AssertionError(f"Unable to access GitHub or PyPi resources ({site}).") from e
 
-        if pip_command != default_command:
-            print(
-                f"WARNING: Using alternative library installation:\n| default: %pip {default_command}\n| current: %pip {pip_command}"
-            )
-        else:
-            # We are using the default libraries; next we need to verify that we can reach those libraries.
-            validate_libraries()
-    
-    return pip_command
+# And print just for reference...
+print(pip_command)
 
 # COMMAND ----------
 
 # MAGIC %md 
 # MAGIC # Install the dbacademy library
 # MAGIC See also https://github.com/databricks-academy/dbacademy
-
-# COMMAND ----------
-
-pip_command = build_pip_command()
-print(pip_command)
 
 # COMMAND ----------
 
@@ -169,7 +148,6 @@ else:
 
 # COMMAND ----------
 
-# DBTITLE 1,Temporarily Disabled for Testing
 from dbacademy.dbhelper import DBAcademyHelper
 from dbacademy.dbhelper.dataset_manager_class import DatasetManager
 
@@ -302,7 +280,6 @@ WarehousesHelper.create_sql_warehouse(client=client,
 
 WorkspaceHelper.add_entitlement_workspace_access(client)
 WorkspaceHelper.add_entitlement_databricks_sql_access(client)
-# WorkspaceHelper.add_entitlement_allow_cluster_create(client)
 
 # COMMAND ----------
 
