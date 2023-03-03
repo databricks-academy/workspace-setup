@@ -263,6 +263,7 @@ from dbacademy.dbhelper.warehouses_helper_class import WarehousesHelper
 
 # Remove the existing Starter Warehouse
 client.sql.endpoints.delete_by_name("Starter Warehouse")
+client.sql.endpoints.delete_by_name("Serverless Starter Warehouse")
 
 # Create the new DBAcademy Warehouse
 WarehousesHelper.create_sql_warehouse(client=client,
