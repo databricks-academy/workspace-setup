@@ -261,6 +261,10 @@ ClustersHelper.create_dlt_policy(client=client,
 
 from dbacademy.dbhelper.warehouses_helper_class import WarehousesHelper
 
+# Remove the existing Starter Warehouse
+client.sql.endpoints.delete_by_name("Starter Warehouse")
+
+# Create the new DBAcademy Warehouse
 WarehousesHelper.create_sql_warehouse(client=client,
                                       name=WarehousesHelper.WAREHOUSES_DEFAULT_NAME,
                                       auto_stop_mins=120,
