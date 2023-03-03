@@ -328,7 +328,8 @@ task_config.task.notebook("Workspace-Setup", source="GIT", base_parameters={
     WorkspaceHelper.PARAM_LAB_ID: lab_id,
     WorkspaceHelper.PARAM_DESCRIPTION: workspace_description,
     WorkspaceHelper.PARAM_NODE_TYPE_ID: node_type_id,
-    WorkspaceHelper.PARAM_SPARK_VERSION: spark_version
+    WorkspaceHelper.PARAM_SPARK_VERSION: spark_version,
+    WorkspaceHelper.PARAM_DATASETS: installed_datasets
 })
 task_config.cluster.new(JobClusterConfig(cloud=Cloud.current_cloud(),
                                          spark_version="11.3.x-scala2.12",
