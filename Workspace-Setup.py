@@ -151,7 +151,7 @@ else:
 from dbacademy.dbhelper import DBAcademyHelper
 from dbacademy.dbhelper.dataset_manager_class import DatasetManager
 
-if installed_datasets is not None:
+if installed_datasets is not None and installed_datasets.strip() not in ("", "null", "None"):
     datasets = installed_datasets.split(",")
 else:
     datasets = [
