@@ -153,7 +153,9 @@ from dbacademy.dbhelper.dataset_manager_class import DatasetManager
 
 if installed_datasets is not None and installed_datasets.strip() not in ("", "null", "None"):
     datasets = installed_datasets.split(",")
+    print(f"Installing " + ", ".join(datasets) + " datasets...")
 else:
+    print(f"Installing all datasets...")
     datasets = [
         "example-course",
         "apache-spark-programming-with-databricks",
@@ -165,8 +167,6 @@ else:
         "ml-in-production",
         "scalable-machine-learning-with-apache-spark",
     ]
-print(f"Installing {datasets}")
-
 
 for dataset in datasets:
     if ":" in dataset:
