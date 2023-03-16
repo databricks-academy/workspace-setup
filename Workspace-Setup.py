@@ -24,7 +24,7 @@
 
 import requests
 
-version = spark.conf.get("dbacademy.library.version", "v3.0.45")
+version = spark.conf.get("dbacademy.library.version", "v3.0.46")
 
 try:
     from dbacademy import dbgems
@@ -83,6 +83,10 @@ print(pip_command)
 from dbacademy import dbgems
 from dbacademy.common import Cloud
 from dbacademy.dbhelper import WorkspaceHelper
+from dbacademy.dbrest import DBAcademyRestClient
+
+# Used throughout for different operations
+client = DBAcademyRestClient(throttle_seconds=1)
 
 try:
     created_widgets=False
@@ -91,6 +95,7 @@ try:
     dbutils.widgets.get(WorkspaceHelper.PARAM_NODE_TYPE_ID)
     dbutils.widgets.get(WorkspaceHelper.PARAM_SPARK_VERSION)
     dbutils.widgets.get(WorkspaceHelper.PARAM_DATASETS)
+    dbutils.widgets.get(WorkspaceHelper.PARAM_COURSES)
 except:
     created_widgets=True
     
@@ -101,9 +106,9 @@ except:
     dbutils.widgets.text(WorkspaceHelper.PARAM_DESCRIPTION, "Unknown", "2. Event Description (optional)")
     
     # The node type id that the cluster pool will be bound too
-    if Cloud.current_cloud() == "AWS":   default_node_type_id = "i3.xlarge"
-    elif Cloud.current_cloud() == "MSA": default_node_type_id = "Standard_DS3_v2"
-    elif Cloud.current_cloud() == "GCP": default_node_type_id = "n1-standard-4"
+    if Cloud.current_cloud() == Cloud.AWS:   default_node_type_id = "i3.xlarge"
+    elif Cloud.current_cloud() == Cloud.MSA: default_node_type_id = "Standard_DS3_v2"
+    elif Cloud.current_cloud() == Cloud.GCP: default_node_type_id = "n1-standard-4"
     else: raise Exception(f"The cloud {Cloud.current_cloud()} is not supported.")
     dbutils.widgets.text(WorkspaceHelper.PARAM_NODE_TYPE_ID, default_node_type_id, "3. Node Type ID (required)")
     
@@ -111,7 +116,10 @@ except:
     dbutils.widgets.text(WorkspaceHelper.PARAM_SPARK_VERSION, "11.3.x-cpu-ml-scala2.12", "4. Spark Versions (required)")
     
     # A comma seperated list of spark versions to preload in the pool
-    dbutils.widgets.text(WorkspaceHelper.PARAM_DATASETS, "", "4. Datasets (defaults to all)")
+    dbutils.widgets.text(WorkspaceHelper.PARAM_DATASETS, "", "5. Datasets (defaults to all)")
+        
+    # A comma seperated list of courseware URLs
+    dbutils.widgets.text(WorkspaceHelper.PARAM_COURSES, "", "6. DBC URLs (defaults to none)")
 
 # COMMAND ----------
 
@@ -138,6 +146,9 @@ else:
     
     installed_datasets = dbgems.get_parameter(WorkspaceHelper.PARAM_DATASETS, None)
     print("Datasets:      ", installed_datasets or "All")    
+        
+    installed_courses = dbgems.get_parameter(WorkspaceHelper.PARAM_COURSES, None)
+    print("Courses:       ", installed_courses or "None")    
 
 # COMMAND ----------
 
@@ -148,54 +159,22 @@ else:
 
 # COMMAND ----------
 
-from dbacademy.dbhelper import DBAcademyHelper
-from dbacademy.dbhelper.dataset_manager_class import DatasetManager
+WorkspaceHelper.install_datasets(installed_datasets)
 
-if installed_datasets is not None and installed_datasets.strip() not in ("", "null", "None"):
-    datasets = installed_datasets.split(",")
-    print(f"Installing " + ", ".join(datasets) + " datasets...")
-else:
-    print(f"Installing all datasets...")
-    datasets = [
-        "example-course",
-        "apache-spark-programming-with-databricks",
-        "data-analysis-with-databricks",
-        "data-engineer-learning-path",
-        "data-engineering-with-databricks",
-        "deep-learning-with-databricks",
-        "introduction-to-python-for-data-science-and-data-engineering",
-        "ml-in-production",
-        "scalable-machine-learning-with-apache-spark",
-    ]
+# COMMAND ----------
 
-for dataset in datasets:
-    if ":" in dataset:
-        dataset, data_source_version = dataset.split(":")
-    else:
-        data_source_version = None
+# MAGIC %md
+# MAGIC 
+# MAGIC # Install Courses
+# MAGIC The main affect of this call is to pre-install the specified courseware.
 
-    if not data_source_version:
-        datasets_uri = f"wasbs://courseware@dbacademy.blob.core.windows.net/{dataset}"
-        data_source_version = sorted([f.name[:-1] for f in dbutils.fs.ls(datasets_uri)])[-1]
-    
-    datasets_path = f"dbfs:/mnt/dbacademy-datasets/{dataset}/{data_source_version}"
-    data_source_uri = f"wasbs://courseware@dbacademy.blob.core.windows.net/{dataset}/{data_source_version}"
+# COMMAND ----------
 
-    print(f"| {data_source_uri}")
-    print(f"| {datasets_path}")
-    
-    remote_files = DatasetManager.list_r(data_source_uri)
-    
-    dataset_manager = DatasetManager(data_source_uri=data_source_uri,
-                                     staging_source_uri=None,
-                                     datasets_path=datasets_path,
-                                     remote_files=remote_files)
-    
-    dataset_manager.install_dataset(install_min_time=None,
-                                    install_max_time=None,
-                                    reinstall_datasets=False)
-    
-    print("\n"+("-"*100)+"\n")
+# WorkspaceHelper.uninstall_courseware(client, installed_courses, subdirectory="dbacademy", usernames=["jacob.parr@databricks.com", "class+000@databricks.com"])
+
+# COMMAND ----------
+
+WorkspaceHelper.install_courseware(client, installed_courses, subdirectory="dbacademy", usernames=["jacob.parr@databricks.com", "class+000@databricks.com"])
 
 # COMMAND ----------
 
@@ -207,9 +186,6 @@ for dataset in datasets:
 # COMMAND ----------
 
 from dbacademy.dbhelper.clusters_helper_class import ClustersHelper
-from dbacademy.dbrest import DBAcademyRestClient
-
-client = DBAcademyRestClient()
 
 instance_pool_id = ClustersHelper.create_named_instance_pool(
     client=client,
@@ -266,12 +242,12 @@ client.sql.endpoints.delete_by_name("Starter Warehouse")
 client.sql.endpoints.delete_by_name("Serverless Starter Warehouse")
 
 # Create the new DBAcademy Warehouse
-WarehousesHelper.create_sql_warehouse(client=client,
-                                      name=WarehousesHelper.WAREHOUSES_DEFAULT_NAME,
-                                      auto_stop_mins=120,
-                                      min_num_clusters=1,
-                                      max_num_clusters=20,
-                                      enable_serverless_compute=True)
+warehouse_id = WarehousesHelper.create_sql_warehouse(client=client,
+                                                     name=WarehousesHelper.WAREHOUSES_DEFAULT_NAME,
+                                                     auto_stop_mins=120,
+                                                     min_num_clusters=1,
+                                                     max_num_clusters=20,
+                                                     enable_serverless_compute=True)
 
 # COMMAND ----------
 
@@ -297,14 +273,9 @@ WorkspaceHelper.add_entitlement_databricks_sql_access(client)
 
 # COMMAND ----------
 
-# Ensures that all users can create databases on the current catalog 
-# for cases wherein the user/student is not an admin.
-
-from dbacademy.dbhelper.databases_helper_class import DatabasesHelper
-
-job_id = DatabasesHelper.configure_permissions(client, "Configure-Permissions", spark_version="10.4.x-scala2.12")
-
-client.jobs().delete_by_id(job_id)
+WarehousesHelper.execute_statements(client, warehouse_id, [
+    "GRANT CREATE ON CATALOG hive_metastore TO users"
+])
 
 # COMMAND ----------
 
@@ -329,13 +300,15 @@ task_config.task.notebook("Workspace-Setup", source="GIT", base_parameters={
     WorkspaceHelper.PARAM_DESCRIPTION: workspace_description,
     WorkspaceHelper.PARAM_NODE_TYPE_ID: node_type_id,
     WorkspaceHelper.PARAM_SPARK_VERSION: spark_version,
-    WorkspaceHelper.PARAM_DATASETS: installed_datasets
+    WorkspaceHelper.PARAM_DATASETS: installed_datasets,
+    WorkspaceHelper.PARAM_COURSES: installed_courses
 })
 task_config.cluster.new(JobClusterConfig(cloud=Cloud.current_cloud(),
                                          spark_version="11.3.x-scala2.12",
                                          node_type_id="i3.xlarge",
                                          num_workers=0,
                                          autotermination_minutes=None))
+None # Suppress output
 
 # COMMAND ----------
 
