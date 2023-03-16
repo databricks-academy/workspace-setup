@@ -171,11 +171,11 @@ WorkspaceHelper.install_datasets(installed_datasets)
 # MAGIC This parameter is expressed as a comma seperated list of courseware defintions.
 # MAGIC 
 # MAGIC Each courseware defintion consists of the following parameters:
-# MAGIC * **course** The name of the course; lower cased, hyphenated, **required**.
-# MAGIC * **version** The version of the specified course; optional, default is **vCURRENT**.
-# MAGIC * **artifact** The specific file name of the DBC; optional, defaults to the one and only DBC in the CDS for the specified version.
-# MAGIC * **token** The vender-specific API token to the CDS; **required**.
-# MAGIC * **url** The URL from which the course will be installed; optional, defaults to **https&colon;//dev.training.databricks.com/api/v1/courses/download.dbc**
+# MAGIC * **course** The name of the course, lower cased, hyphenated, **required**.
+# MAGIC * **version** The version of the specified course, optional, default is **vCURRENT**.
+# MAGIC * **artifact** The specific file name of the DBC, optional, defaults to the one and only DBC in the CDS for the specified version.
+# MAGIC * **token** The vender-specific API token to the CDS, **required**.
+# MAGIC * **url** The URL from which the course will be installed, optional, defaults to **https&colon;//dev.training.databricks.com/api/v1/courses/download.dbc**
 # MAGIC 
 # MAGIC Examples:
 # MAGIC * **course=<span style="color:blue">welcome</span>**
