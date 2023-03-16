@@ -163,10 +163,25 @@ WorkspaceHelper.install_datasets(installed_datasets)
 
 # COMMAND ----------
 
-# MAGIC %md
+# MAGIC %md-sandbox
 # MAGIC 
 # MAGIC # Install Courses
 # MAGIC The main affect of this call is to pre-install the specified courseware.
+# MAGIC 
+# MAGIC This parameter is expressed as a comma seperated list of courseware defintions.
+# MAGIC 
+# MAGIC Each courseware defintion consists of the following parameters:
+# MAGIC * **course** The name of the course; lower cased, hyphenated, **required**.
+# MAGIC * **version** The version of the specified course; optional, default is **vCURRENT**.
+# MAGIC * **artifact** The specific file name of the DBC; optional, defaults to the one and only DBC in the CDS for the specified version.
+# MAGIC * **token** The vender-specific API token to the CDS; **required**.
+# MAGIC * **url** The URL from which the course will be installed; optional, defaults to **https&colon;//dev.training.databricks.com/api/v1/courses/download.dbc**
+# MAGIC 
+# MAGIC Examples:
+# MAGIC * **course=<span style="color:blue">welcome</span>**
+# MAGIC * **course=<span style="color:blue">example-course</span>&version=<span style="color:red">v1.1.6</span>**
+# MAGIC * **course=<span style="color:blue">template-course</span>&version=<span style="color:red">v1.0.0</span>&artifact=<span style="color:green">template-course.dbc</span>**
+# MAGIC * **<span style="color:orange">https&colon;//dev.training.databricks.com/api/v1/courses/download.dbc</span>?course=<span style="color:blue">ml-in-production</span>&version=<span style="color:red">v3.4.5</span>&artifact=<span style="color:green">ml-in-production-v3.4.5-notebooks.dbc</span>&token=<span style="color:brown">asfd123</span>**
 
 # COMMAND ----------
 
