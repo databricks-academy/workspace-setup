@@ -259,7 +259,7 @@ client.sql.endpoints.delete_by_name("Serverless Starter Warehouse")
 # Create the new DBAcademy Warehouse
 warehouse_id = WarehousesHelper.create_sql_warehouse(client=client,
                                                      name=WarehousesHelper.WAREHOUSES_DEFAULT_NAME,
-                                                     auto_stop_mins=120,
+                                                     auto_stop_mins=None,
                                                      min_num_clusters=1,
                                                      max_num_clusters=20,
                                                      enable_serverless_compute=True)
