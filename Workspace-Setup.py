@@ -24,7 +24,7 @@
 
 import requests
 
-version = spark.conf.get("dbacademy.library.version", "v3.0.50")
+version = spark.conf.get("dbacademy.library.version", "v3.0.51")
 
 try:
     from dbacademy import dbgems
