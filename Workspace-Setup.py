@@ -185,11 +185,11 @@ WorkspaceHelper.install_datasets(installed_datasets)
 
 # COMMAND ----------
 
-# WorkspaceHelper.uninstall_courseware(client, installed_courses, subdirectory="dbacademy", usernames=["jacob.parr@databricks.com", "class+000@databricks.com"])
+# WorkspaceHelper.uninstall_courseware(client, installed_courses, subdirectory="dbacademy")
 
 # COMMAND ----------
 
-WorkspaceHelper.install_courseware(client, installed_courses, subdirectory="dbacademy", usernames=["jacob.parr@databricks.com", "class+000@databricks.com"])
+WorkspaceHelper.install_courseware(client, installed_courses, subdirectory="dbacademy")
 
 # COMMAND ----------
 
