@@ -327,7 +327,7 @@ None # Suppress output
 
 # COMMAND ----------
 
-if dbgems.get_tag("jobName") == WorkspaceHelper.BOOTSTRAP_JOB_NAME:
+if dbgems.get_tag("jobName") in [None, WorkspaceHelper.BOOTSTRAP_JOB_NAME]:
     # Create the real job, deleting it if it already exists.
     print(f"Deleting {job_name}")
     client.jobs.delete_by_name(job_name, success_only=False)
