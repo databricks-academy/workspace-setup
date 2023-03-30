@@ -24,7 +24,7 @@
 
 import requests
 
-version = spark.conf.get("dbacademy.library.version", "v3.0.64")
+version = spark.conf.get("dbacademy.library.version", "v3.0.65")
 
 try:
     from dbacademy import dbgems
@@ -186,9 +186,6 @@ WorkspaceHelper.install_datasets(installed_datasets)
 # COMMAND ----------
 
 # WorkspaceHelper.uninstall_courseware(client, installed_courses, subdirectory="dbacademy")
-
-# COMMAND ----------
-
 WorkspaceHelper.install_courseware(client, installed_courses, subdirectory="dbacademy")
 
 # COMMAND ----------
