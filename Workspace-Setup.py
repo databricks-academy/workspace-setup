@@ -24,7 +24,7 @@
 
 import requests
 
-version = spark.conf.get("dbacademy.library.version", "v3.0.67")
+version = spark.conf.get("dbacademy.library.version", "v3.0.68")
 
 try:
     from dbacademy import dbgems
@@ -278,16 +278,23 @@ WorkspaceHelper.add_entitlement_databricks_sql_access(client)
 
 # MAGIC %md
 # MAGIC 
-# MAGIC ## Update Grants
-# MAGIC This operation executes **`GRANT CREATE ON CATALOG TO users`** to ensure that students can create databases as required by this course when they are not admins.
+# MAGIC ## Validate UC Configuration.
+# MAGIC This operation attempts to create a catalog and a table in that catalog.
 # MAGIC 
-# MAGIC Note: The implementation requires this to execute in another job and as such can take about three minutes to complete.
+# MAGIC If UC is not configured properly then this operation would be expected to fail.
 
 # COMMAND ----------
 
-WarehousesHelper.execute_statements(client, warehouse_id, [
-    "GRANT CREATE ON CATALOG hive_metastore TO users"
-])
+# MAGIC %sql
+# MAGIC CREATE CATALOG IF NOT EXISTS WORKSPACE_SETUP ;
+# MAGIC SHOW DATABASES IN WORKSPACE_SETUP;
+# MAGIC CREATE TABLE IF NOT EXISTS WORKSPACE_SETUP.default.test AS SELECT true AS test_passed;
+# MAGIC SELECT * FROM WORKSPACE_SETUP.default.test;
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC DROP CATALOG WORKSPACE_SETUP CASCADE;
 
 # COMMAND ----------
 
