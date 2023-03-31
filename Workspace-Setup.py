@@ -265,19 +265,6 @@ warehouse_id = WarehousesHelper.create_sql_warehouse(client=client,
 
 # MAGIC %md
 # MAGIC 
-# MAGIC ## Configure User Entitlements
-# MAGIC 
-# MAGIC Updates the entlitlements for the "**users**" group ensuring that they can access the Workspace and/or Databricks SQL view.
-
-# COMMAND ----------
-
-WorkspaceHelper.add_entitlement_workspace_access(client)
-WorkspaceHelper.add_entitlement_databricks_sql_access(client)
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC 
 # MAGIC ## Validate UC Configuration.
 # MAGIC This operation attempts to create a catalog and a table in that catalog.
 # MAGIC 
