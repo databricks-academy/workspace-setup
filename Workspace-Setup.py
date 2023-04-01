@@ -152,17 +152,6 @@ else:
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC 
-# MAGIC # Install Datasets
-# MAGIC The main affect of this call is to pre-install the datasets.
-
-# COMMAND ----------
-
-WorkspaceHelper.install_datasets(installed_datasets)
-
-# COMMAND ----------
-
 # MAGIC %md-sandbox
 # MAGIC 
 # MAGIC # Install Courses
@@ -333,6 +322,19 @@ if dbgems.get_tag("jobName") in [None, WorkspaceHelper.BOOTSTRAP_JOB_NAME]:
 else:
     print(f"Deleting {WorkspaceHelper.BOOTSTRAP_JOB_NAME}")
     client.jobs.delete_by_name(WorkspaceHelper.BOOTSTRAP_JOB_NAME, success_only=False)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC 
+# MAGIC # Install Datasets
+# MAGIC If a specific dataset is not specified, all datasets will be installed.
+# MAGIC 
+# MAGIC This includes the latest and latest-1 datasets to account for courses where-in to datasets are being used two versions of the same course in any given season of development.
+
+# COMMAND ----------
+
+WorkspaceHelper.install_datasets(installed_datasets)
 
 # COMMAND ----------
 
