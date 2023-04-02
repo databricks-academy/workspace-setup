@@ -276,57 +276,6 @@ warehouse_id = WarehousesHelper.create_sql_warehouse(client=client,
 
 # MAGIC %md
 # MAGIC 
-# MAGIC ## Define Workspace-Setup Job
-# MAGIC Creates an unscheduled job referencing this specific notebook.
-
-# COMMAND ----------
-
-from dbacademy.dbrest.jobs import JobConfig
-from dbacademy.dbrest.clusters import JobClusterConfig
-
-job_name = WorkspaceHelper.WORKSPACE_SETUP_JOB_NAME
-job_config = JobConfig(job_name=job_name, timeout_seconds=15*60)
-
-job_config.git_branch(provider="gitHub", url="https://github.com/databricks-academy/workspace-setup.git", branch="published")
-
-task_config = job_config.add_task(task_key="Workspace-Setup", description="This job is used to configure the workspace per Databricks Academy's courseware requirements")
-task_config.task.notebook("Workspace-Setup", source="GIT", base_parameters={
-    WorkspaceHelper.PARAM_LAB_ID: lab_id,
-    WorkspaceHelper.PARAM_DESCRIPTION: workspace_description,
-    WorkspaceHelper.PARAM_NODE_TYPE_ID: node_type_id,
-    WorkspaceHelper.PARAM_SPARK_VERSION: spark_version,
-    WorkspaceHelper.PARAM_DATASETS: installed_datasets,
-    WorkspaceHelper.PARAM_COURSES: installed_courses
-})
-task_config.cluster.new(JobClusterConfig(cloud=Cloud.current_cloud(),
-                                         spark_version="11.3.x-scala2.12",
-                                         node_type_id="i3.xlarge",
-                                         num_workers=0,
-                                         autotermination_minutes=None))
-None # Suppress output
-
-# COMMAND ----------
-
-if dbgems.get_tag("jobName") in [None, WorkspaceHelper.BOOTSTRAP_JOB_NAME]:
-    # Create the real job, deleting it if it already exists.
-    print(f"Deleting {job_name}")
-    client.jobs.delete_by_name(job_name, success_only=False)
-    
-    print(f"Creating {job_name}")
-    job_id = client.jobs.create_from_config(job_config)
-    dbgems.display_html(f"""
-    <html style="margin:0"><body style="margin:0"><div style="margin:0">
-        See <a href="/#job/{job_id}" target="_blank">{job_name} ({job_id})</a>
-    </div></body></html>
-    """)
-else:
-    print(f"Deleting {WorkspaceHelper.BOOTSTRAP_JOB_NAME}")
-    client.jobs.delete_by_name(WorkspaceHelper.BOOTSTRAP_JOB_NAME, success_only=False)
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC 
 # MAGIC # Install Datasets
 # MAGIC If a specific dataset is not specified, all datasets will be installed.
 # MAGIC 
