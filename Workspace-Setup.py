@@ -220,10 +220,10 @@ ClustersHelper.create_jobs_policy(client=client,
                                   spark_version=spark_version)
 
 ClustersHelper.create_dlt_policy(client=client, 
-                                lab_id=lab_id, 
-                                workspace_description=workspace_description, 
-                                workspace_name=WorkspaceHelper.get_workspace_name(),
-                                org_id=dbgems.get_org_id())
+                                 lab_id=lab_id, 
+                                 workspace_description=workspace_description, 
+                                 workspace_name=WorkspaceHelper.get_workspace_name(),
+                                 org_id=dbgems.get_org_id())
 
 # COMMAND ----------
 
