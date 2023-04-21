@@ -56,15 +56,21 @@ class SimpleRestClient:
     Simplified version of Databricks Edu's rest client, included here only for demonstration purposes.
     """
 
-    def __init__(self, *, username, password, url):
+    def __init__(self, *, username=None, password=None, url=None, token=None):
         from requests.adapters import HTTPAdapter
 
         self.url = url
         self.username = username
         self.password = password
+        self.token = token
 
-        encoded_auth = f"{username}:{password}".encode()
-        self.authorization_header = "Basic " + base64.standard_b64encode(encoded_auth).decode()
+        if username and password:
+            encoded_auth = f"{username}:{password}".encode()
+            self.authorization_header = "Basic " + base64.standard_b64encode(encoded_auth).decode()
+        elif token:
+            self.authorization_header = "Bearer " + token
+        else:
+            raise ValueError("Must specify either username/password or token")
 
         self.session = requests.Session()
         self.session.headers = {'Authorization': self.authorization_header, 'Content-Type': 'text/json'}
