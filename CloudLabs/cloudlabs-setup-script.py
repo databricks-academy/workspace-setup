@@ -2,7 +2,7 @@
 import time, os
 from dataclasses import dataclass
 from typing import Optional
-from dbacademy_test.workspaces_cloudlabs.simplified_rest_client import SimpleRestClient
+from simplified_rest_client import SimpleRestClient
 
 
 @dataclass()
