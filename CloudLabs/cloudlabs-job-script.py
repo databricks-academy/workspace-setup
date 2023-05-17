@@ -9,14 +9,14 @@ from simplified_rest_client import SimpleRestClient
 
 
 lab_config = {
-    "JOB-URL":
+    "jobURL":
         "https://raw.githubusercontent.com/databricks-academy/workspace-setup/main/CloudLabs/cloudlabs-job-config.json",
     "WORKSPACE-URL": "https://redacted.cloud.databricks.com/",
     "WORKSPACE-TOKEN": "REDACTED",
     "ODL-ID": "11111",
     "ODL-TITLE": "Data Engineering with Databricks - Test",
-    "WORKER-SIZE": "i3.xlarge",
-    "RUNTIME-VERSION": "11.3.x-cpu-ml-scala2.12",
+    "workerSize": "i3.xlarge",
+    "runtimeVersion": "11.3.x-cpu-ml-scala2.12",
 }
 
 Cloud = Literal["aws", "azure", "gcp"]
@@ -54,7 +54,7 @@ def strip_cloud_specific_keys(cloud: Cloud, data: Any):
 def run_workspace_setup(config: dict[str, str]):
     workspace_url = config["WORKSPACE-URL"]
     workspace_token = config["WORKSPACE-TOKEN"]
-    job_spec_url = config["JOB-URL"]
+    job_spec_url = config["jobURL"]
     workspaces_api = SimpleRestClient(url=workspace_url, token=workspace_token)
 
     ###############################################################################################

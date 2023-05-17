@@ -10,8 +10,9 @@
             "base_parameters": {
                 "lab_id": "{{ODL-ID}}",
                 "description": "{{ODL-TITLE}}",
-                "node_type_id": "{{WORKER-SIZE}}",
-                "spark_version": "{{RUNTIME-VERSION}}",
+                "tenant": "{{ODL-TENANT}}",
+                "node_type_id": "{{workerSize}}",
+                "spark_version": "{{runtimeVersion}}",
                 "datasets": "",
                 "courses": ""
             },
@@ -34,7 +35,8 @@
             "custom_tags": {
                 "ResourceClass": "SingleNode",
                 "dbacademy.event_id": "{{ODL-ID}}",
-                "dbacademy.event_description": "{{ODL-TITLE}}"
+                "dbacademy.event_description": "{{ODL-TITLE}}",
+                "dbacademy.tenant": "{{ODL-TENANT}}"
             },
             "spark_env_vars": {
                 "PYSPARK_PYTHON": "/databricks/python3/bin/python3"
