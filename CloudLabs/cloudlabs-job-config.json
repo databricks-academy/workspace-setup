@@ -11,7 +11,7 @@
                 "lab_id": "{{ODL-ID}}",
                 "description": "{{ODL-TITLE}}",
                 "tenant": "{{ODL-TENANT}}",
-                "node_type_id": "{{workerSize}}",
+                "node_type_id": "{{poolWorkerSize}}",
                 "spark_version": "{{runtimeVersion}}",
                 "datasets": "",
                 "courses": ""
