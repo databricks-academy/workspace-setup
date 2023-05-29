@@ -4,9 +4,9 @@
     "format": "MULTI_TASK",
     "timeout_seconds": 7200,
     "tasks": [{
-        "task_key": "Workspace-Setup",
+        "task_key": "DAIS-2023-Workspace-Setup",
         "notebook_task": {
-            "notebook_path": "Workspace-Setup",
+            "notebook_path": "CloudLabs/DAIS-2023-Workspace-Setup",
             "base_parameters": {
                 "lab_id": "{{ODL-ID}}",
                 "description": "{{ODL-TITLE}}",
