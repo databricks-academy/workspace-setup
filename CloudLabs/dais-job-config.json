@@ -14,7 +14,7 @@
                 "spark_version": "{{runtimeVersion}}",
                 "node_type_id": "{{poolWorkerSize}}",
                 "course": "{{course}}",
-                "courseVersion": "{{courseVersion}}",
+                "course_version": "{{courseVersion}}",
                 "datasets": "{{dataset}}",
                 "dataset_version": "{{datasetVersion}}"
             },
