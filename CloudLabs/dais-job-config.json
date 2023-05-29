@@ -11,10 +11,12 @@
                 "lab_id": "{{ODL-ID}}",
                 "description": "{{ODL-TITLE}}",
                 "tenant": "{{ODL-TENANT}}",
-                "node_type_id": "{{poolWorkerSize}}",
                 "spark_version": "{{runtimeVersion}}",
-                "datasets": "",
-                "courses": ""
+                "node_type_id": "{{poolWorkerSize}}",
+                "course": "{{course}}",
+                "courseVersion": "{{courseVersion}}",
+                "datasets": "{{dataset}}",
+                "dataset_version": "{{datasetVersion}}"
             },
             "source": "GIT"
         },
