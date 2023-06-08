@@ -225,26 +225,19 @@ ClustersHelper.create_dlt_policy(client=client,
 
 # COMMAND ----------
 
-# Not required for the quota test, but we will use the hard coded array for DAIS.
-
-# They convention doesn't work because we have courses that are
-# N-1 versions behind and subsequently may install the wrong dataset.
-# datasets = courses  
-# WorkspaceHelper.install_datasets(datasets)
-
-# # WorkspaceHelper.install_datasets([
-#     "example-course",
-#     "apache-spark-programming-with-databricks",
-#     "advanced-data-engineering-with-databricks",
-#     "building-and-deploying-large-language-models-on-databricks",
-#     "data-analysis-with-databricks",
-#     "data-engineer-learning-path",
-#     "data-engineering-with-databricks",
-#     "deep-learning-with-databricks",
-#     "introduction-to-python-for-data-science-and-data-engineering",
-#     "ml-in-production",
-#     "scalable-machine-learning-with-apache-spark",
-# ])
+WorkspaceHelper.install_datasets([
+    "example-course",
+    "apache-spark-programming-with-databricks",
+    "advanced-data-engineering-with-databricks",
+    "large-language-models",
+    "data-analysis-with-databricks",
+    "data-engineer-learning-path",
+    "data-engineering-with-databricks",
+    "deep-learning-with-databricks",
+    "introduction-to-python-for-data-science-and-data-engineering",
+    "ml-in-production",
+    "scalable-machine-learning-with-apache-spark",
+])
 
 # COMMAND ----------
 
