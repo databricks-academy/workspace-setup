@@ -22,7 +22,7 @@
 
 # COMMAND ----------
 
-version = "v3.0.74"
+version = "v3.0.81"
 
 library_url = f"https://github.com/databricks-academy/dbacademy/releases/download/{version}/dbacademy-{version[1:]}-py3-none-any.whl"
 pip_command = f"install --quiet --disable-pip-version-check {library_url}"
