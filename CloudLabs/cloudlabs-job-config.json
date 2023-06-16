@@ -47,16 +47,16 @@
             "num_workers": 0,
             "aws:aws_attributes": {
                 "first_on_demand": 1,
-                "availability": "SPOT_WITH_FALLBACK",
+                "availability": "ON_DEMAND",
                 "spot_bid_price_percent": 100
             },
             "azure:azure_attributes": {
                 "first_on_demand": 1,
-                "availability": "SPOT_WITH_FALLBACK_AZURE"
+                "availability": "ON_DEMAND_AZURE"
             },
             "gcp:gcp_attributes": {
                 "use_preemptible_executors": true,
-                "availability": "PREEMPTIBLE_WITH_FALLBACK_GCP"
+                "availability": "ON_DEMAND_GCP"
             }
         }
     }],
