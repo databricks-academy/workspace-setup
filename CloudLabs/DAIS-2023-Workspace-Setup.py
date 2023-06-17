@@ -22,7 +22,7 @@
 
 # COMMAND ----------
 
-version = "v3.0.74"
+version = "v3.0.81"
 
 library_url = f"https://github.com/databricks-academy/dbacademy/releases/download/{version}/dbacademy-{version[1:]}-py3-none-any.whl"
 pip_command = f"install --quiet --disable-pip-version-check {library_url}"
@@ -60,7 +60,7 @@ try:
     created_widgets=False
     dbutils.widgets.get(WorkspaceHelper.PARAM_LAB_ID)
     dbutils.widgets.get(WorkspaceHelper.PARAM_DESCRIPTION)
-    # dbutils.widgets.get(WorkspaceHelper.PARAM_NODE_TYPE_ID)
+    dbutils.widgets.get(WorkspaceHelper.PARAM_NODE_TYPE_ID)
     dbutils.widgets.get(WorkspaceHelper.PARAM_SPARK_VERSION)
     # dbutils.widgets.get(WorkspaceHelper.PARAM_DATASETS)
     # dbutils.widgets.get(WorkspaceHelper.PARAM_COURSES)
@@ -73,7 +73,7 @@ except:
     dbutils.widgets.text(WorkspaceHelper.PARAM_DESCRIPTION, "", "2. Event Description (optional)")
     
     # The node type id that the cluster pool will be bound too
-    # dbutils.widgets.text(WorkspaceHelper.PARAM_NODE_TYPE_ID, "", "3. Node Type ID (required)")
+    dbutils.widgets.text(WorkspaceHelper.PARAM_NODE_TYPE_ID, "", "3. Node Type ID (required)")
     
     # A comma seperated list of spark versions to preload in the pool
     dbutils.widgets.text(WorkspaceHelper.PARAM_SPARK_VERSION, "", "4. Spark Versions (required)")
@@ -101,9 +101,9 @@ else:
     assert workspace_description is not None, f"""The parameter "{WorkspaceHelper.PARAM_DESCRIPTION}" must be specified."""
     print("Description:   ", workspace_description or "None")
     
-    # node_type_id = dbgems.get_parameter(WorkspaceHelper.PARAM_NODE_TYPE_ID, None)
-    # assert node_type_id is not None, f"""The parameter "{WorkspaceHelper.PARAM_NODE_TYPE_ID}" must be specified."""
-    # print("Node Type ID:  ", node_type_id or "None")
+    node_type_id = dbgems.get_parameter(WorkspaceHelper.PARAM_NODE_TYPE_ID, None)
+    assert node_type_id is not None, f"""The parameter "{WorkspaceHelper.PARAM_NODE_TYPE_ID}" must be specified."""
+    print("Node Type ID:  ", node_type_id or "None")
     
     spark_version = dbgems.get_parameter(WorkspaceHelper.PARAM_SPARK_VERSION, None)
     assert spark_version is not None, f"""The parameter "{WorkspaceHelper.PARAM_SPARK_VERSION}" must be specified."""
@@ -126,19 +126,19 @@ else:
 
 from dbacademy.dbhelper.clusters_helper_class import ClustersHelper
 
-instance_pool_id = None  # Don't use a pool for DAIS
+# instance_pool_id = None  # Don't use a pool for DAIS
 
-# instance_pool_id = ClustersHelper.create_named_instance_pool(
-#     client=client,
-#     name=ClustersHelper.POOL_DEFAULT_NAME,
-#     min_idle_instances=0,
-#     idle_instance_autotermination_minutes=15,
-#     lab_id=lab_id,
-#     workspace_description=workspace_description,
-#     workspace_name=WorkspaceHelper.get_workspace_name(),
-#     org_id=dbgems.get_org_id(),
-#     node_type_id=dbgems.get_parameter(WorkspaceHelper.PARAM_NODE_TYPE_ID, None),
-#     preloaded_spark_version=spark_version)
+instance_pool_id = ClustersHelper.create_named_instance_pool(
+    client=client,
+    name=ClustersHelper.POOL_DEFAULT_NAME,
+    min_idle_instances=0,
+    idle_instance_autotermination_minutes=15,
+    lab_id=lab_id,
+    workspace_description=workspace_description,
+    workspace_name=WorkspaceHelper.get_workspace_name(),
+    org_id=dbgems.get_org_id(),
+    node_type_id=dbgems.get_parameter(WorkspaceHelper.PARAM_NODE_TYPE_ID, None),
+    preloaded_spark_version=spark_version)
 
 # COMMAND ----------
 
@@ -225,26 +225,19 @@ ClustersHelper.create_dlt_policy(client=client,
 
 # COMMAND ----------
 
-# Not required for the quota test, but we will use the hard coded array for DAIS.
-
-# They convention doesn't work because we have courses that are
-# N-1 versions behind and subsequently may install the wrong dataset.
-# datasets = courses  
-# WorkspaceHelper.install_datasets(datasets)
-
-# # WorkspaceHelper.install_datasets([
-#     "example-course",
-#     "apache-spark-programming-with-databricks",
-#     "advanced-data-engineering-with-databricks",
-#     "building-and-deploying-large-language-models-on-databricks",
-#     "data-analysis-with-databricks",
-#     "data-engineer-learning-path",
-#     "data-engineering-with-databricks",
-#     "deep-learning-with-databricks",
-#     "introduction-to-python-for-data-science-and-data-engineering",
-#     "ml-in-production",
-#     "scalable-machine-learning-with-apache-spark",
-# ])
+WorkspaceHelper.install_datasets([
+    "example-course",
+    "apache-spark-programming-with-databricks",
+    "advanced-data-engineering-with-databricks",
+    "large-language-models",
+    "data-analysis-with-databricks",
+    "data-engineer-learning-path",
+    "data-engineering-with-databricks",
+    "deep-learning-with-databricks",
+    "introduction-to-python-for-data-science-and-data-engineering",
+    "ml-in-production",
+    "scalable-machine-learning-with-apache-spark",
+])
 
 # COMMAND ----------
 

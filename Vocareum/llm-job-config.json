@@ -2,7 +2,7 @@
     "name": "DBAcademy Workspace-Setup",
     "max_concurrent_runs": 1,
     "format": "MULTI_TASK",
-    "timeout_seconds": 10800,
+    "timeout_seconds": 7200,
     "tasks": [{
         "task_key": "DAIS-2023-Workspace-Setup",
         "notebook_task": {
@@ -49,16 +49,16 @@
             "num_workers": 0,
             "aws:aws_attributes": {
                 "first_on_demand": 1,
-                "availability": "ON_DEMAND",
+                "availability": "SPOT_WITH_FALLBACK",
                 "spot_bid_price_percent": 100
             },
             "azure:azure_attributes": {
                 "first_on_demand": 1,
-                "availability": "ON_DEMAND_AZURE"
+                "availability": "SPOT_WITH_FALLBACK_AZURE"
             },
             "gcp:gcp_attributes": {
                 "use_preemptible_executors": true,
-                "availability": "ON_DEMAND_GCP"
+                "availability": "PREEMPTIBLE_WITH_FALLBACK_GCP"
             }
         }
     }],
