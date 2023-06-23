@@ -2,7 +2,7 @@
 # MAGIC %md
 # MAGIC # Workspace Setup
 # MAGIC This notebook should be run to prepare the workspace for a class.
-# MAGIC 
+# MAGIC
 # MAGIC The key changes this notebook makes includes:
 # MAGIC * Updating user-specific grants such that they can create databases/schemas against the current catalog when they are not workspace-admins.
 # MAGIC * Configures three cluster policies:
@@ -11,7 +11,7 @@
 # MAGIC     * **DBAcademy DLT** - which should be used on DLT piplines (automatically applied)
 # MAGIC * Create or update the shared **DBAcademy Warehouse** for use in Databricks SQL exercises
 # MAGIC * Create the Instance Pool **DBAcademy** for use by students and the "student" and "jobs" policies.
-# MAGIC 
+# MAGIC
 # MAGIC See https://docs.google.com/document/d/1gb2uLE69eZamw_pzL5q3QZwCK0A0SMLjjTtfGIHrf8I/edit
 
 # COMMAND ----------
@@ -153,19 +153,19 @@ else:
 # COMMAND ----------
 
 # MAGIC %md-sandbox
-# MAGIC 
+# MAGIC
 # MAGIC # Install Courses
 # MAGIC The main affect of this call is to pre-install the specified courseware.
-# MAGIC 
+# MAGIC
 # MAGIC This parameter is expressed as a comma seperated list of courseware defintions.
-# MAGIC 
+# MAGIC
 # MAGIC Each courseware defintion consists of the following parameters:
 # MAGIC * **course** The name of the course, lower cased, hyphenated, **required**.
 # MAGIC * **version** The version of the specified course, optional, default is **vCURRENT**.
 # MAGIC * **artifact** The specific file name of the DBC, optional, defaults to the one and only DBC in the CDS for the specified version.
 # MAGIC * **token** The vender-specific API token to the CDS, **required**.
 # MAGIC * **url** The URL from which the course will be installed, optional, defaults to **https&colon;//dev.training.databricks.com/api/v1/courses/download.dbc**
-# MAGIC 
+# MAGIC
 # MAGIC Examples:
 # MAGIC * **course=<span style="color:blue">welcome</span>**
 # MAGIC * **course=<span style="color:blue">example-course</span>&version=<span style="color:red">v1.1.6</span>**
@@ -180,7 +180,7 @@ WorkspaceHelper.install_courseware(client, installed_courses, subdirectory="dbac
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC 
+# MAGIC
 # MAGIC ## Create Class Instance Pools
 # MAGIC The following cell configures the instance pool used for this class
 
@@ -203,7 +203,7 @@ instance_pool_id = ClustersHelper.create_named_instance_pool(
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC 
+# MAGIC
 # MAGIC ## Create The Three Class-Specific Cluster Policies
 # MAGIC The following cells create the various cluster policies used by the class
 
@@ -228,10 +228,10 @@ ClustersHelper.create_dlt_policy(client=client,
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC 
+# MAGIC
 # MAGIC ## Create Class-Shared Databricks SQL Warehouse/Endpoint
 # MAGIC Creates a single wharehouse to be used by all students.
-# MAGIC 
+# MAGIC
 # MAGIC The configuration is derived from the number of students specified above.
 
 # COMMAND ----------
@@ -253,10 +253,22 @@ warehouse_id = WarehousesHelper.create_sql_warehouse(client=client,
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC 
+# MAGIC
+# MAGIC ## Configure Permissions
+# MAGIC This is required for the DAWD class. While we thought it was addressed with a courseware update, testing prior to DAIS indicated that it was still required.  
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC GRANT SELECT ON ANY FILE TO `users`
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC
 # MAGIC ## Validate UC Configuration.
 # MAGIC This operation attempts to create a catalog and a table in that catalog.
-# MAGIC 
+# MAGIC
 # MAGIC If UC is not configured properly then this operation would be expected to fail.
 
 # COMMAND ----------
@@ -275,10 +287,10 @@ warehouse_id = WarehousesHelper.create_sql_warehouse(client=client,
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC 
+# MAGIC
 # MAGIC # Install Datasets
 # MAGIC If a specific dataset is not specified, all datasets will be installed.
-# MAGIC 
+# MAGIC
 # MAGIC This includes the latest and latest-1 datasets to account for courses where-in to datasets are being used two versions of the same course in any given season of development.
 
 # COMMAND ----------
@@ -294,7 +306,7 @@ print(f"Setup completed {dbgems.clock_stopped(setup_start)}")
 # MAGIC %md
 # MAGIC ## Define Workspace-Setup Job
 # MAGIC Creates an unscheduled job referencing this specific notebook.
-# MAGIC 
+# MAGIC
 # MAGIC <strong>Note:<strong> this pattern is no longer used in favor of a simplified system, relying instead on the setup-script to create and re-use the job.
 
 # COMMAND ----------

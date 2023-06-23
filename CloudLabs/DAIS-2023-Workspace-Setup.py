@@ -107,7 +107,7 @@ else:
     
     spark_version = dbgems.get_parameter(WorkspaceHelper.PARAM_SPARK_VERSION, None)
     assert spark_version is not None, f"""The parameter "{WorkspaceHelper.PARAM_SPARK_VERSION}" must be specified."""
-    print("Spark Version:", spark_version or "None")
+    print("Spark Version: ", spark_version or "None")
 
     # datasets = dbgems.get_parameter(WorkspaceHelper.PARAM_DATASETS, None)
     # print("Datasets:      ", datasets or "All")    
@@ -164,6 +164,18 @@ ClustersHelper.create_dlt_policy(client=client,
                                  workspace_description=workspace_description, 
                                  workspace_name=WorkspaceHelper.get_workspace_name(),
                                  org_id=dbgems.get_org_id())
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC
+# MAGIC ## Configure Permissions
+# MAGIC This is required for the DAWD class. While we thought it was addressed with a courseware update, testing prior to DAIS indicated that it was still required.  
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC GRANT SELECT ON ANY FILE TO `users`
 
 # COMMAND ----------
 
