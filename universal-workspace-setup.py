@@ -259,8 +259,8 @@ warehouse_id = WarehousesHelper.create_sql_warehouse(client=client,
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC GRANT SELECT ON ANY FILE TO `users`
+# %sql
+# GRANT SELECT ON ANY FILE TO `users`
 
 # COMMAND ----------
 
