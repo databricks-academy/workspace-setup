@@ -2,9 +2,9 @@
     "name": "DBAcademy Workspace-Setup",
     "max_concurrent_runs": 1,
     "format": "MULTI_TASK",
-    "timeout_seconds": 7200,
+    "timeout_seconds": 10800,
     "tasks": [{
-        "task_key": "Workspace-Setup",
+        "task_key": "universal-workspace-setup",
         "notebook_task": {
             "notebook_path": "universal-workspace-setup",
             "base_parameters": {
@@ -13,8 +13,10 @@
                 "tenant": "{{ODL-TENANT}}",
                 "node_type_id": "{{poolWorkerSize}}",
                 "spark_version": "{{runtimeVersion}}",
-                "datasets": "",
-                "courses": ""
+                "course": "{{course}}",
+                "course_version": "{{courseVersion}}",
+                "datasets": "{{dataset}}",
+                "dataset_version": "{{datasetVersion}}"
             },
             "source": "GIT"
         },
