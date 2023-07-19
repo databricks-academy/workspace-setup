@@ -13,10 +13,8 @@
                 "tenant": "{{ODL-TENANT}}",
                 "node_type_id": "{{poolWorkerSize}}",
                 "spark_version": "{{runtimeVersion}}",
-                "course": "{{course}}",
-                "course_version": "{{courseVersion}}",
-                "datasets": "{{dataset}}",
-                "dataset_version": "{{datasetVersion}}"
+                "courses": "{{courses}}",
+                "datasets": "{{datasets}}"
             },
             "source": "GIT"
         },

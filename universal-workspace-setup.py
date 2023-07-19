@@ -16,57 +16,18 @@
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC ## Validate Libraries and Build PIP Command
-# MAGIC The following code works to ensure that the dbacademy library is reachable from this workspace and then define the pip command used to attach that library to the current cluster.
-
-# COMMAND ----------
-
-import requests
-
-version = spark.conf.get("dbacademy.library.version", "v3.0.68")
-
-try:
-    from dbacademy import dbgems
-
-    installed_version = dbgems.lookup_current_module_version("dbacademy")
-    if installed_version == version:
-        pip_command = "list --quiet"  # Skipping pip install of pre-installed python library
-    else:
-        print(f"WARNING: The wrong version of dbacademy is attached to this cluster. Expected {version}, found {installed_version}.")
-        print(f"Installing the correct version.")
-        raise Exception("Forcing re-install")
-
-except Exception as e:
-    # The import fails if library is not attached to cluster
-    if not version.startswith("v"):
-        library_url = f"git+https://github.com/databricks-academy/dbacademy@{version}"
-    else:
-        library_url = f"https://github.com/databricks-academy/dbacademy/releases/download/{version}/dbacademy-{version[1:]}-py3-none-any.whl"
-
-    default_command = f"install --quiet --disable-pip-version-check {library_url}"
-    pip_command = spark.conf.get("dbacademy.library.install", default_command)
-
-    if pip_command != default_command:
-        print(f"WARNING: Using alternative library installation:\n| default: %pip {default_command}\n| current: %pip {pip_command}")
-    else:
-        # We are using the default libraries; next we need to verify that we can reach those libraries.
-        try:
-            site = "https://github.com/databricks-academy/dbacademy"
-            response = requests.get(site)
-            assert response.status_code == 200, f"Unable to access GitHub or PyPi resources (HTTP {response.status_code} for {site})."
-        except Exception as e:
-            if type(e) is AssertionError: raise e
-            raise AssertionError(f"Unable to access GitHub or PyPi resources ({site}).") from e
-
-# And print just for reference...
-print(pip_command)
-
-# COMMAND ----------
-
 # MAGIC %md 
 # MAGIC # Install the dbacademy library
 # MAGIC See also https://github.com/databricks-academy/dbacademy
+
+# COMMAND ----------
+
+version = "v3.0.85"
+library_url = f"https://github.com/databricks-academy/dbacademy/releases/download/{version}/dbacademy-{version[1:]}-py3-none-any.whl"
+pip_command = f"install --quiet --disable-pip-version-check {library_url}"
+
+# And print just for reference...
+print(pip_command)
 
 # COMMAND ----------
 
@@ -77,6 +38,10 @@ print(pip_command)
 # MAGIC %md
 # MAGIC # Define Required Parameters (e.g. Widgets)
 # MAGIC The three variables defined by these widgets are used to configure our environment as a means of controlling class cost.
+
+# COMMAND ----------
+
+# dbutils.widgets.removeAll()
 
 # COMMAND ----------
 
@@ -100,26 +65,13 @@ except:
     created_widgets=True
     
     # lab_id is the name assigned to this event/class or alternatively its class number
-    dbutils.widgets.text(WorkspaceHelper.PARAM_LAB_ID, "Unknown", "1. Lab/Class ID (optional)")
-
-    # a general purpose description of the class
-    dbutils.widgets.text(WorkspaceHelper.PARAM_DESCRIPTION, "Unknown", "2. Event Description (optional)")
-    
-    # The node type id that the cluster pool will be bound too
-    if Cloud.current_cloud() == Cloud.AWS:   default_node_type_id = "i3.xlarge"
-    elif Cloud.current_cloud() == Cloud.MSA: default_node_type_id = "Standard_DS3_v2"
-    elif Cloud.current_cloud() == Cloud.GCP: default_node_type_id = "n1-standard-4"
-    else: raise Exception(f"The cloud {Cloud.current_cloud()} is not supported.")
-    dbutils.widgets.text(WorkspaceHelper.PARAM_NODE_TYPE_ID, default_node_type_id, "3. Node Type ID (required)")
-    
-    # A comma seperated list of spark versions to preload in the pool
-    dbutils.widgets.text(WorkspaceHelper.PARAM_SPARK_VERSION, "11.3.x-cpu-ml-scala2.12", "4. Spark Versions (required)")
-    
-    # A comma seperated list of spark versions to preload in the pool
+    dbutils.widgets.text(WorkspaceHelper.PARAM_LAB_ID, "", "1. Lab/Class ID (optional)")
+    dbutils.widgets.text(WorkspaceHelper.PARAM_DESCRIPTION, "", "2. Event Description (optional)")
+    dbutils.widgets.text(WorkspaceHelper.PARAM_NODE_TYPE_ID, "", "3. Node Type ID (required)")
+    dbutils.widgets.text(WorkspaceHelper.PARAM_SPARK_VERSION, "", "4. Spark Versions (required)")
     dbutils.widgets.text(WorkspaceHelper.PARAM_DATASETS, "", "5. Datasets (defaults to all)")
-        
-    # A comma seperated list of courseware URLs
     dbutils.widgets.text(WorkspaceHelper.PARAM_COURSES, "", "6. DBC URLs (defaults to none)")
+
 
 # COMMAND ----------
 
@@ -144,11 +96,11 @@ else:
     assert spark_version is not None, f"The parameter \"Spark Version\" must be specified."
     print("Spark Versions:", spark_version or "None")
     
-    installed_datasets = dbgems.get_parameter(WorkspaceHelper.PARAM_DATASETS, None)
-    print("Datasets:      ", installed_datasets or "All")    
+    datasets = dbgems.get_parameter(WorkspaceHelper.PARAM_DATASETS, None)
+    print("Datasets:      ", datasets or "All ILT Datasets")
         
-    installed_courses = dbgems.get_parameter(WorkspaceHelper.PARAM_COURSES, None)
-    print("Courses:       ", installed_courses or "None")    
+    courses = dbgems.get_parameter(WorkspaceHelper.PARAM_COURSES, None)
+    print("Courses:       ", courses or "None")
 
 # COMMAND ----------
 
@@ -174,8 +126,11 @@ else:
 
 # COMMAND ----------
 
-# WorkspaceHelper.uninstall_courseware(client, installed_courses, subdirectory="dbacademy")
-WorkspaceHelper.install_courseware(client, installed_courses, subdirectory="dbacademy")
+WorkspaceHelper.uninstall_courseware(client, courses, subdirectory=None)
+
+# COMMAND ----------
+
+WorkspaceHelper.install_courseware(client, courses, subdirectory=None)
 
 # COMMAND ----------
 
@@ -295,60 +250,8 @@ warehouse_id = WarehousesHelper.create_sql_warehouse(client=client,
 
 # COMMAND ----------
 
-WorkspaceHelper.install_datasets(installed_datasets)
+WorkspaceHelper.install_datasets(datasets)
 
 # COMMAND ----------
 
 print(f"Setup completed {dbgems.clock_stopped(setup_start)}")
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ## Define Workspace-Setup Job
-# MAGIC Creates an unscheduled job referencing this specific notebook.
-# MAGIC
-# MAGIC <strong>Note:<strong> this pattern is no longer used in favor of a simplified system, relying instead on the setup-script to create and re-use the job.
-
-# COMMAND ----------
-
-# from dbacademy.dbrest.jobs import JobConfig
-# from dbacademy.dbrest.clusters import JobClusterConfig
-
-# job_name = WorkspaceHelper.WORKSPACE_SETUP_JOB_NAME
-# job_config = JobConfig(job_name=job_name, timeout_seconds=15*60)
-
-# job_config.git_branch(provider="gitHub", url="https://github.com/databricks-academy/workspace-setup.git", branch="published")
-
-# task_config = job_config.add_task(task_key="Workspace-Setup", description="This job is used to configure the workspace per Databricks Academy's courseware requirements")
-# task_config.task.notebook("Workspace-Setup", source="GIT", base_parameters={
-#     WorkspaceHelper.PARAM_LAB_ID: lab_id,
-#     WorkspaceHelper.PARAM_DESCRIPTION: workspace_description,
-#     WorkspaceHelper.PARAM_NODE_TYPE_ID: node_type_id,
-#     WorkspaceHelper.PARAM_SPARK_VERSION: spark_version,
-#     WorkspaceHelper.PARAM_DATASETS: installed_datasets,
-#     WorkspaceHelper.PARAM_COURSES: installed_courses
-# })
-# task_config.cluster.new(JobClusterConfig(cloud=Cloud.current_cloud(),
-#                                          spark_version="11.3.x-scala2.12",
-#                                          node_type_id="i3.xlarge",
-#                                          num_workers=0,
-#                                          autotermination_minutes=None))
-# None # Suppress output
-
-# COMMAND ----------
-
-# if dbgems.get_tag("jobName") in [None, WorkspaceHelper.BOOTSTRAP_JOB_NAME]:
-#     # Create the real job, deleting it if it already exists.
-#     print(f"Deleting {job_name}")
-#     client.jobs.delete_by_name(job_name, success_only=False)
-
-#     print(f"Creating {job_name}")
-#     job_id = client.jobs.create_from_config(job_config)
-#     dbgems.display_html(f"""
-#     <html style="margin:0"><body style="margin:0"><div style="margin:0">
-#         See <a href="/#job/{job_id}" target="_blank">{job_name} ({job_id})</a>
-#     </div></body></html>
-#     """)
-# else:
-#     print(f"Deleting {WorkspaceHelper.BOOTSTRAP_JOB_NAME}")
-#     client.jobs.delete_by_name(WorkspaceHelper.BOOTSTRAP_JOB_NAME, success_only=False)
