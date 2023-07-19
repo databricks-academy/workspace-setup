@@ -6,7 +6,7 @@
     "tasks": [{
         "task_key": "Workspace-Setup",
         "notebook_task": {
-            "notebook_path": "Workspace-Setup",
+            "notebook_path": "universal-workspace-setup",
             "base_parameters": {
                 "lab_id": "{{ODL-ID}}",
                 "description": "{{ODL-TITLE}}",
