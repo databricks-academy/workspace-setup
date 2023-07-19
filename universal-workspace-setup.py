@@ -62,7 +62,7 @@ try:
     dbutils.widgets.get(WorkspaceHelper.PARAM_DATASETS)
     dbutils.widgets.get(WorkspaceHelper.PARAM_COURSES)
 except:
-    created_widgets=True
+    created_widgets = False if dbgems.is_job() else True
     
     # lab_id is the name assigned to this event/class or alternatively its class number
     dbutils.widgets.text(WorkspaceHelper.PARAM_LAB_ID, "", "1. Lab/Class ID (optional)")
