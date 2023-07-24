@@ -92,7 +92,7 @@ else:
     assert node_type_id is not None, f"The parameter \"Node Type ID\" must be specified."
     print("Node Type ID:  ", node_type_id or "None")
     
-    spark_version = dbgems.get_parameter(WorkspaceHelper.PARAM_POOLS_NODE_TYPE_ID, None)
+    spark_version = dbgems.get_parameter(WorkspaceHelper.PARAM_DEFAULT_SPARK_VERSION, None)
     assert spark_version is not None, f"The parameter \"Spark Version\" must be specified."
     print("Spark Versions:", spark_version or "None")
     
@@ -101,6 +101,10 @@ else:
         
     courses = dbgems.get_parameter(WorkspaceHelper.PARAM_COURSES, None)
     print("Courses:       ", courses or "None")
+
+    workspace_name = WorkspaceHelper.get_workspace_name()
+    print("Workspace Name:", workspace_name)
+
 
 # COMMAND ----------
 
@@ -150,9 +154,9 @@ instance_pool_id = ClustersHelper.create_named_instance_pool(
     idle_instance_autotermination_minutes=15,
     lab_id=lab_id,
     workspace_description=workspace_description,
-    workspace_name=WorkspaceHelper.get_workspace_name(),
+    workspace_name=workspace_name,
     org_id=dbgems.get_org_id(),
-    node_type_id=dbgems.get_parameter(WorkspaceHelper.PARAM_NODE_TYPE_ID, None),
+    node_type_id=node_type_id,
     preloaded_spark_version=spark_version)
 
 # COMMAND ----------
@@ -177,7 +181,7 @@ ClustersHelper.create_jobs_policy(client=client,
 ClustersHelper.create_dlt_policy(client=client, 
                                  lab_id=lab_id, 
                                  workspace_description=workspace_description, 
-                                 workspace_name=WorkspaceHelper.get_workspace_name(),
+                                 workspace_name=workspace_name,
                                  org_id=dbgems.get_org_id())
 
 # COMMAND ----------
