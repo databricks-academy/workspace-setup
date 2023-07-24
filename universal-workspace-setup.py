@@ -22,7 +22,7 @@
 
 # COMMAND ----------
 
-version = "v4.0.6"
+version = "v4.0.7"
 library_url = f"https://github.com/databricks-academy/dbacademy/releases/download/{version}/dbacademy-{version[1:]}-py3-none-any.whl"
 pip_command = f"install --quiet --disable-pip-version-check {library_url}"
 
@@ -55,20 +55,20 @@ client = DBAcademyRestClient(throttle_seconds=1)
 
 try:
     created_widgets=False
-    dbutils.widgets.get(WorkspaceHelper.PARAM_LAB_ID)
-    dbutils.widgets.get(WorkspaceHelper.PARAM_DESCRIPTION)
-    dbutils.widgets.get(WorkspaceHelper.PARAM_NODE_TYPE_ID)
-    dbutils.widgets.get(WorkspaceHelper.PARAM_SPARK_VERSION)
+    dbutils.widgets.get(WorkspaceHelper.PARAM_EVENT_ID)
+    dbutils.widgets.get(WorkspaceHelper.PARAM_EVENT_DESCRIPTION)
+    dbutils.widgets.get(WorkspaceHelper.PARAM_POOLS_NODE_TYPE_ID)
+    dbutils.widgets.get(WorkspaceHelper.PARAM_DEFAULT_SPARK_VERSION)
     dbutils.widgets.get(WorkspaceHelper.PARAM_DATASETS)
     dbutils.widgets.get(WorkspaceHelper.PARAM_COURSES)
 except:
     created_widgets = False if dbgems.is_job() else True
     
     # lab_id is the name assigned to this event/class or alternatively its class number
-    dbutils.widgets.text(WorkspaceHelper.PARAM_LAB_ID, "", "1. Lab/Class ID (optional)")
-    dbutils.widgets.text(WorkspaceHelper.PARAM_DESCRIPTION, "", "2. Event Description (optional)")
-    dbutils.widgets.text(WorkspaceHelper.PARAM_NODE_TYPE_ID, "", "3. Node Type ID (required)")
-    dbutils.widgets.text(WorkspaceHelper.PARAM_SPARK_VERSION, "", "4. Spark Versions (required)")
+    dbutils.widgets.text(WorkspaceHelper.PARAM_EVENT_ID, "", "1. Lab/Class ID (optional)")
+    dbutils.widgets.text(WorkspaceHelper.PARAM_EVENT_DESCRIPTION, "", "2. Event Description (optional)")
+    dbutils.widgets.text(WorkspaceHelper.PARAM_POOLS_NODE_TYPE_ID, "", "3. Pool's Node Type ID (required)")
+    dbutils.widgets.text(WorkspaceHelper.PARAM_DEFAULT_SPARK_VERSION, "", "4. Default Spark Versions (required)")
     dbutils.widgets.text(WorkspaceHelper.PARAM_DATASETS, "", "5. Datasets (defaults to all)")
     dbutils.widgets.text(WorkspaceHelper.PARAM_COURSES, "", "6. DBC URLs (defaults to none)")
 

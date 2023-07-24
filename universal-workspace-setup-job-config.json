@@ -8,11 +8,11 @@
         "notebook_task": {
             "notebook_path": "universal-workspace-setup",
             "base_parameters": {
-                "lab_id": "{{event_id}}",
-                "description": "{{event_description}}",
+                "event_id": "{{event_id}}",
+                "event_description": "{{event_description}}",
                 "deployment_context": "{{deployment_context}}",
-                "node_type_id": "{{pools_node_type_id}}",
-                "spark_version": "{{default_spark_version}}",
+                "pools_node_type_id": "{{pools_node_type_id}}",
+                "default_spark_version": "{{default_spark_version}}",
                 "courses": "{{courses}}",
                 "datasets": "{{datasets}}"
             },
