@@ -65,7 +65,7 @@ except:
     created_widgets = False if dbgems.is_job() else True
     
     # lab_id is the name assigned to this event/class or alternatively its class number
-    dbutils.widgets.text(WorkspaceHelper.PARAM_EVENT_ID, "", "1. Lab/Class ID (optional)")
+    dbutils.widgets.text(WorkspaceHelper.PARAM_EVENT_ID, "", "1. Class/Event/Lab ID (optional)")
     dbutils.widgets.text(WorkspaceHelper.PARAM_EVENT_DESCRIPTION, "", "2. Event Description (optional)")
     dbutils.widgets.text(WorkspaceHelper.PARAM_POOLS_NODE_TYPE_ID, "", "3. Pool's Node Type ID (required)")
     dbutils.widgets.text(WorkspaceHelper.PARAM_DEFAULT_SPARK_VERSION, "", "4. Default Spark Versions (required)")
@@ -82,17 +82,17 @@ else:
     # Start a timer so we can benchmark execution duration.
     setup_start = dbgems.clock_start()
     
-    lab_id = dbgems.get_parameter(WorkspaceHelper.PARAM_LAB_ID, None)
+    lab_id = dbgems.get_parameter(WorkspaceHelper.PARAM_EVENT_ID, None)
     print("Lab ID:        ", lab_id or "None")
     
-    workspace_description = dbgems.get_parameter(WorkspaceHelper.PARAM_DESCRIPTION, None)
+    workspace_description = dbgems.get_parameter(WorkspaceHelper.PARAM_EVENT_DESCRIPTION, None)
     print("Description:   ", workspace_description or "None")
     
-    node_type_id = dbgems.get_parameter(WorkspaceHelper.PARAM_NODE_TYPE_ID, None)
+    node_type_id = dbgems.get_parameter(WorkspaceHelper.PARAM_POOLS_NODE_TYPE_ID, None)
     assert node_type_id is not None, f"The parameter \"Node Type ID\" must be specified."
     print("Node Type ID:  ", node_type_id or "None")
     
-    spark_version = dbgems.get_parameter(WorkspaceHelper.PARAM_SPARK_VERSION, None)
+    spark_version = dbgems.get_parameter(WorkspaceHelper.PARAM_POOLS_NODE_TYPE_ID, None)
     assert spark_version is not None, f"The parameter \"Spark Version\" must be specified."
     print("Spark Versions:", spark_version or "None")
     
