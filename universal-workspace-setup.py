@@ -217,7 +217,7 @@ warehouse_id = WarehousesHelper.create_sql_warehouse(client=client,
 endpoint = client.sql.endpoints.get_by_name(WarehousesHelper.WAREHOUSES_DEFAULT_NAME)
 warehouse_id = endpoint.get("id")
 statements = [
-    "GRANT SELECT ON ANY FILE TO `users`"    
+    "GRANT SELECT ON ANY FILE TO `users`"
 ]
 for catalog in ["main", "hive_metastore"]:
     for statement in statements:

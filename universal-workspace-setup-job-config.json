@@ -8,11 +8,11 @@
         "notebook_task": {
             "notebook_path": "universal-workspace-setup",
             "base_parameters": {
-                "lab_id": "{{ODL-ID}}",
-                "description": "{{ODL-TITLE}}",
-                "tenant": "{{ODL-TENANT}}",
-                "node_type_id": "{{poolWorkerSize}}",
-                "spark_version": "{{runtimeVersion}}",
+                "lab_id": "{{event_id}}",
+                "description": "{{event_description}}",
+                "deployment_context": "{{deployment_context}}",
+                "node_type_id": "{{pools_node_type_id}}",
+                "spark_version": "{{default_spark_version}}",
                 "courses": "{{courses}}",
                 "datasets": "{{datasets}}"
             },
@@ -34,9 +34,9 @@
             },
             "custom_tags": {
                 "ResourceClass": "SingleNode",
-                "dbacademy.event_id": "{{ODL-ID}}",
-                "dbacademy.event_description": "{{ODL-TITLE}}",
-                "dbacademy.tenant": "{{ODL-TENANT}}"
+                "dbacademy.event_id": "{{event_id}}",
+                "dbacademy.event_description": "{{event_description}}",
+                "dbacademy.deployment_context": "{{deployment_context}}"
             },
             "spark_env_vars": {
                 "PYSPARK_PYTHON": "/databricks/python3/bin/python3"
