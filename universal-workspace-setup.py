@@ -4,15 +4,13 @@
 # MAGIC This notebook should be run to prepare the workspace for a class.
 # MAGIC
 # MAGIC The key changes this notebook makes includes:
-# MAGIC * Updating user-specific grants such that they can create databases/schemas against the current catalog when they are not workspace-admins.
+# MAGIC * Create the Instance Pool **DBAcademy** for use by students and the "student" and "jobs" policies.
 # MAGIC * Configures three cluster policies:
 # MAGIC     * **DBAcademy** - which should be used on clusters running standard notebooks.
-# MAGIC     * **DBAcademy Jobs** - which should be used on workflows/jobs
-# MAGIC     * **DBAcademy DLT** - which should be used on DLT piplines (automatically applied)
-# MAGIC * Create or update the shared **DBAcademy Warehouse** for use in Databricks SQL exercises
-# MAGIC * Create the Instance Pool **DBAcademy** for use by students and the "student" and "jobs" policies.
-# MAGIC
-# MAGIC See https://docs.google.com/document/d/1gb2uLE69eZamw_pzL5q3QZwCK0A0SMLjjTtfGIHrf8I/edit
+# MAGIC     * **DBAcademy Jobs** - which should be used on workflows/jobs.
+# MAGIC     * **DBAcademy DLT** - which should be used on DLT piplines.
+# MAGIC * Create or update the shared **DBAcademy Warehouse** for use in Databricks SQL exercises.
+# MAGIC * Updating workspace-specific grants in the **main** and **hive_metastore** catalogs.
 
 # COMMAND ----------
 
@@ -41,6 +39,7 @@ print(pip_command)
 
 # COMMAND ----------
 
+# # Removes all widgets while testing
 # dbutils.widgets.removeAll()
 
 # COMMAND ----------
