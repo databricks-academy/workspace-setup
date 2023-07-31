@@ -50,7 +50,7 @@
                 "availability": "ON_DEMAND",
                 "spot_bid_price_percent": 100
             },
-            "azure:azure_attributes": {
+            "msa:azure_attributes": {
                 "first_on_demand": 1,
                 "availability": "ON_DEMAND_AZURE"
             },
