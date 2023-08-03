@@ -96,7 +96,7 @@ else:
     print("Spark Versions:", spark_version or "None")
     
     datasets = dbgems.get_parameter(WorkspaceHelper.PARAM_DATASETS, None)
-    datasets = None if datasets == None or datasets.strip() == "" or datasets.strip().lower() == "none" else courses
+    datasets = None if datasets == None or datasets.strip() == "" or datasets.strip().lower() == "none" else datasets
     print("Datasets:      ", datasets or "All ILT Datasets")
         
     courses = dbgems.get_parameter(WorkspaceHelper.PARAM_COURSES, None)
